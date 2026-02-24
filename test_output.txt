@@ -1,0 +1,16 @@
+﻿  蹂듭썝???꾨줈?앺듃瑜??뺤씤?섎뒗 以?..
+  蹂듭썝??紐⑤뱺 ?꾨줈?앺듃媛 理쒖떊 ?곹깭?낅땲??
+  DynamicCrawler.Core -> D:\sources\github\Dynamic-Crawler\src\DynamicCrawler.Core\bin\Debug\net10.0\DynamicCrawler.Core.dll
+  DynamicCrawler.Sites.Aagag -> D:\sources\github\Dynamic-Crawler\src\Sites\DynamicCrawler.Sites.Aagag\bin\Debug\net10.0\DynamicCrawler.Sites.Aagag.dll
+  DynamicCrawler.Engine -> D:\sources\github\Dynamic-Crawler\src\DynamicCrawler.Engine\bin\Debug\net10.0\DynamicCrawler.Engine.dll
+  DynamicCrawler.Downloader -> D:\sources\github\Dynamic-Crawler\src\DynamicCrawler.Downloader\bin\Debug\net10.0\DynamicCrawler.Downloader.dll
+  DynamicCrawler.Data.Supabase -> D:\sources\github\Dynamic-Crawler\src\DynamicCrawler.Data.Supabase\bin\Debug\net10.0\DynamicCrawler.Data.Supabase.dll
+  DynamicCrawler.Orchestrator -> D:\sources\github\Dynamic-Crawler\src\DynamicCrawler.Orchestrator\bin\Debug\net10.0\DynamicCrawler.Orchestrator.dll
+  DynamicCrawler.Tests -> D:\sources\github\Dynamic-Crawler\tests\DynamicCrawler.Tests\bin\Debug\net10.0\DynamicCrawler.Tests.dll
+D:\sources\github\Dynamic-Crawler\tests\DynamicCrawler.Tests\bin\Debug\net10.0\DynamicCrawler.Tests.dll(.NETCoreApp,Version=v10.0)??????뚯뒪???ㅽ뻾
+VSTest 踰꾩쟾 18.0.1 (x64)
+
+?뚯뒪???ㅽ뻾???쒖옉?섎뒗 以묒엯?덈떎. ?좎떆 湲곕떎??二쇱꽭??..
+吏?뺣맂 ?⑦꽩怨??쇱튂??珥??뚯뒪???뚯씪 ?섎뒗 1媛쒖엯?덈떎.
+
+?듦낵!  - ?ㅽ뙣:     0, ?듦낵:    27, 嫄대꼫?:     0, ?꾩껜:    27, 湲곌컙: 447 ms - DynamicCrawler.Tests.dll (net10.0)

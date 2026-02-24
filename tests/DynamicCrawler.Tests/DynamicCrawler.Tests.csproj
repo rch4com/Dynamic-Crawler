@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DynamicCrawler.Core\DynamicCrawler.Core.csproj" />
+    <ProjectReference Include="..\..\src\DynamicCrawler.Data.Supabase\DynamicCrawler.Data.Supabase.csproj" />
+    <ProjectReference Include="..\..\src\DynamicCrawler.Engine\DynamicCrawler.Engine.csproj" />
+    <ProjectReference Include="..\..\src\DynamicCrawler.Downloader\DynamicCrawler.Downloader.csproj" />
+    <ProjectReference Include="..\..\src\DynamicCrawler.Orchestrator\DynamicCrawler.Orchestrator.csproj" />
+    <ProjectReference Include="..\..\src\Sites\DynamicCrawler.Sites.Aagag\DynamicCrawler.Sites.Aagag.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="coverlet.collector" />
+  </ItemGroup>
+</Project>

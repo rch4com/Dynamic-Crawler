@@ -6,7 +6,7 @@ namespace DynamicCrawler.Data.Supabase.Models;
 [Table("posts")]
 public sealed class SupabasePost : BaseModel
 {
-    [PrimaryKey("id", false)]  public long Id { get; set; }
+    [PrimaryKey("id", false)]  public long? Id { get; set; }
     [Column("site_key")]       public string SiteKey { get; set; } = "";
     [Column("external_id")]    public string ExternalId { get; set; } = "";
     [Column("url")]            public string Url { get; set; } = "";

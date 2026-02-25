@@ -20,6 +20,8 @@ public sealed class PuppeteerCrawlEngine(
             var browser = await browserManager.GetBrowserAsync(ct).ConfigureAwait(false);
             page = await browser.NewPageAsync().ConfigureAwait(false);
 
+            await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36").ConfigureAwait(false);
+
             // 네트워크 최적화: CSS/폰트/이미지/미디어 차단, XHR/Fetch 허용
             await NetworkOptimizer.ApplyAsync(page).ConfigureAwait(false);
 
@@ -75,12 +77,14 @@ public sealed class PuppeteerCrawlEngine(
             page = await newPageTask.ConfigureAwait(false);
             logger.LogInformation("NewPage 생성 성공. 네트워크 최적화 적용 중: {Url}", url);
 
+            await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36").ConfigureAwait(false);
+
             await NetworkOptimizer.ApplyAsync(page).ConfigureAwait(false);
             logger.LogInformation("네트워크 최적화 적용 완료. GoToAsync 호출: {Url}", url);
 
             var navigationTask = page.GoToAsync(url, new NavigationOptions
             {
-                WaitUntil = [WaitUntilNavigation.DOMContentLoaded],
+                WaitUntil = [WaitUntilNavigation.Networkidle2],
                 Timeout = 30_000
             });
             
@@ -98,7 +102,8 @@ public sealed class PuppeteerCrawlEngine(
                 throw new TimeoutException($"GetContentAsync timed out after 10s: {url}");
             
             var html = await contentTask.ConfigureAwait(false);
-            logger.LogInformation("GetContentAsync 완료. HTML 확보: {Url} (길이: {Length})", url, html.Length);
+            var snippet = html.Length > 200 ? html.Substring(0, 200).Replace("\n", "").Replace("\r", "") : html;
+            logger.LogInformation("GetContentAsync 완료. HTML 확보: {Url} (길이: {Length}) 미리보기: {Snippet}", url, html.Length, snippet);
             
             browserManager.IncrementProcessedCount();
 

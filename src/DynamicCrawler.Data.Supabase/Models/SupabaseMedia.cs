@@ -6,7 +6,7 @@ namespace DynamicCrawler.Data.Supabase.Models;
 [Table("media")]
 public sealed class SupabaseMedia : BaseModel
 {
-    [PrimaryKey("id", false)]  public long Id { get; set; }
+    [PrimaryKey("id", false)]  public long? Id { get; set; }
     [Column("post_id")]        public long PostId { get; set; }
     [Column("media_url")]      public string MediaUrl { get; set; } = "";
     [Column("content_type")]   public string? ContentType { get; set; }

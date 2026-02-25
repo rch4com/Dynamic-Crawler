@@ -8,7 +8,7 @@ internal static class PostMapper
 {
     public static Post ToDomain(SupabasePost sp) => new()
     {
-        Id = sp.Id,
+        Id = sp.Id ?? 0,
         SiteKey = sp.SiteKey,
         ExternalId = sp.ExternalId,
         Url = sp.Url,
@@ -23,7 +23,7 @@ internal static class PostMapper
 
     public static SupabasePost ToSupabase(Post p) => new()
     {
-        Id = p.Id,
+        Id = p.Id == 0 ? null : p.Id,
         SiteKey = p.SiteKey,
         ExternalId = p.ExternalId,
         Url = p.Url,

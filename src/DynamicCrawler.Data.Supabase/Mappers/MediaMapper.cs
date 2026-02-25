@@ -8,7 +8,7 @@ internal static class MediaMapper
 {
     public static Media ToDomain(SupabaseMedia sm) => new()
     {
-        Id = sm.Id,
+        Id = sm.Id ?? 0,
         PostId = sm.PostId,
         MediaUrl = sm.MediaUrl,
         ContentType = sm.ContentType,
@@ -24,7 +24,7 @@ internal static class MediaMapper
 
     public static SupabaseMedia ToSupabase(Media m) => new()
     {
-        Id = m.Id,
+        Id = m.Id == 0 ? null : m.Id,
         PostId = m.PostId,
         MediaUrl = m.MediaUrl,
         ContentType = m.ContentType,

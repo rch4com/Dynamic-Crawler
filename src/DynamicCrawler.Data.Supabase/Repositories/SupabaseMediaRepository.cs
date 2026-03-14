@@ -47,23 +47,18 @@ public sealed class SupabaseMediaRepository(
     public async Task UpdateAsync(Media media, CancellationToken ct = default)
     {
         var model = MediaMapper.ToSupabase(media);
-        var query = client.From<SupabaseMedia>()
+        await client.From<SupabaseMedia>()
             .Where(m => m.Id == media.Id)
             .Set(m => m.Status, model.Status)
-            .Set(m => m.RetryCount, model.RetryCount);
-
-        if (model.Sha256 is not null)
-            query = query.Set(m => m.Sha256!, model.Sha256);
-        if (model.ByteSize.HasValue)
-            query = query.Set(m => m.ByteSize!.Value, model.ByteSize.Value);
-        if (model.ContentType is not null)
-            query = query.Set(m => m.ContentType!, model.ContentType);
-        if (model.LocalPath is not null)
-            query = query.Set(m => m.LocalPath!, model.LocalPath);
-        if (model.NextRetryAt.HasValue)
-            query = query.Set(m => m.NextRetryAt!.Value, model.NextRetryAt.Value);
-
-        await query.Update().ConfigureAwait(false);
+            .Set(m => m.RetryCount, model.RetryCount)
+            .Set(m => m.Sha256!, model.Sha256)
+            .Set(m => m.ByteSize!, model.ByteSize)
+            .Set(m => m.ContentType!, model.ContentType)
+            .Set(m => m.LocalPath!, model.LocalPath)
+            .Set(m => m.NextRetryAt!, model.NextRetryAt)
+            .Set(m => m.LeaseUntil!, model.LeaseUntil)
+            .Update()
+            .ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<Media>> BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default)

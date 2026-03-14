@@ -78,6 +78,8 @@ public class OrphanedDataRecoveryTests
         var restoredPost = posts.Single(p => p.ExternalId == "2");
         Assert.Equal(PostStatus.Discovered, restoredPost.Status);
         Assert.Null(restoredPost.LeaseUntil);
+        Assert.True(restoredPost.RetryCount > 0);
+        Assert.NotNull(restoredPost.NextRetryAt);
         
         // 정상 진행 중이던 3번은 Collecting 상태 유지
         Assert.Equal(PostStatus.Collecting, posts.Single(p => p.ExternalId == "3").Status);
@@ -87,5 +89,7 @@ public class OrphanedDataRecoveryTests
         var restoredMedia = medias.Single(m => m.MediaUrl == "http://test/1.jpg");
         Assert.Equal(MediaStatus.PendingDownload, restoredMedia.Status);
         Assert.Null(restoredMedia.LeaseUntil);
+        Assert.True(restoredMedia.RetryCount > 0);
+        Assert.NotNull(restoredMedia.NextRetryAt);
     }
 }

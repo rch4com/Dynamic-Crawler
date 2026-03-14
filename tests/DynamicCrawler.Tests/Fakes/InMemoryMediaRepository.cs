@@ -18,6 +18,7 @@ public sealed class InMemoryMediaRepository : IMediaRepository
         // siteKey 기반 필터링은 간소화 (InMemory에서는 모든 미디어에서 찾음)
         var media = _media.FirstOrDefault(m =>
             m.Status == MediaStatus.PendingDownload &&
+            (m.NextRetryAt is null || m.NextRetryAt <= DateTime.UtcNow) &&
             (m.LeaseUntil is null || m.LeaseUntil < DateTime.UtcNow));
 
         if (media is null)
@@ -40,6 +41,8 @@ public sealed class InMemoryMediaRepository : IMediaRepository
             existing.ContentType = media.ContentType;
             existing.LocalPath = media.LocalPath;
             existing.RetryCount = media.RetryCount;
+            existing.NextRetryAt = media.NextRetryAt;
+            existing.LeaseUntil = media.LeaseUntil;
         }
         return Task.CompletedTask;
     }
@@ -74,6 +77,8 @@ public sealed class InMemoryMediaRepository : IMediaRepository
         foreach (var m in _media.Where(m => m.Status == MediaStatus.Downloading && m.LeaseUntil < DateTime.UtcNow))
         {
             m.Status = MediaStatus.PendingDownload;
+            m.RetryCount++;
+            m.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, m.RetryCount));
             m.LeaseUntil = null;
             count++;
         }

@@ -1,0 +1,13 @@
+<prefix>: <short summary>
+
+<detailed description>
+
+# Allowed prefixes:
+# feat, fix, refactor, chore, docs, style, test, perf, ci, build
+#
+# Example:
+# feat: add order export api
+#
+# - Add export endpoint for ERP order list
+# - Apply date range filtering
+# - Improve error handling for empty results

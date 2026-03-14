@@ -91,4 +91,42 @@ public class OrchestratorFlowTests
             "external-99",
             It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task DownloadOrchestrator_Failure_ShouldClearLeaseAndPreserveBackoff()
+    {
+        var postRepo = new InMemoryPostRepository();
+        var mediaRepo = new InMemoryMediaRepository();
+        postRepo.Seed(new Post { SiteKey = "aagag", ExternalId = "external-100", Url = "https://aagag.com/100" });
+        mediaRepo.Seed(new Media { PostId = 1, MediaUrl = "https://cdn.test/fail.jpg" });
+
+        var siteRepo = new Mock<ISiteRepository>();
+        siteRepo.Setup(repo => repo.GetActiveSitesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Site { SiteKey = "aagag", BaseUrl = "https://aagag.com" }]);
+
+        var downloader = new Mock<IMediaDownloader>();
+        downloader.Setup(service => service.DownloadAsync(
+                It.IsAny<Media>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<DownloadResult>.Failure("boom", "DOWNLOAD_ERROR"));
+
+        var orchestrator = new DownloadOrchestrator(
+            mediaRepo,
+            postRepo,
+            siteRepo.Object,
+            downloader.Object,
+            new RoundRobinScheduler(),
+            new CrawlPipeline(),
+            Options.Create(new CrawlerSettings()),
+            NullLogger<DownloadOrchestrator>.Instance);
+
+        await orchestrator.RunCycleAsync(CancellationToken.None);
+
+        var failed = mediaRepo.MediaList.Single();
+        failed.Status.Should().Be(MediaStatus.PendingDownload);
+        failed.LeaseUntil.Should().BeNull();
+        failed.NextRetryAt.Should().NotBeNull();
+    }
 }

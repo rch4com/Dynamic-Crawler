@@ -78,6 +78,8 @@ public sealed class DownloadOrchestrator(
             media.ContentType = result.ContentType;
             media.LocalPath = result.LocalPath;
             media.Status = MediaStatus.Downloaded;
+            media.NextRetryAt = null;
+            media.LeaseUntil = null;
 
             await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
             logger.LogInformation("Downloaded media {Url} as {Sha256}", media.MediaUrl, result.Sha256[..12]);
@@ -89,6 +91,7 @@ public sealed class DownloadOrchestrator(
                 ? MediaStatus.Failed
                 : MediaStatus.PendingDownload;
             media.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, media.RetryCount));
+            media.LeaseUntil = null;
 
             await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
             logger.LogWarning("Failed to download media {Url}: {Error}", media.MediaUrl, downloadResult.Error);

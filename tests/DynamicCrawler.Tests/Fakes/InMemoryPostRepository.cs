@@ -76,6 +76,8 @@ public sealed class InMemoryPostRepository : IPostRepository
         foreach (var post in _posts.Where(p => p.Status == PostStatus.Collecting && p.LeaseUntil < DateTime.UtcNow))
         {
             post.Status = PostStatus.Discovered;
+            post.RetryCount++;
+            post.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, post.RetryCount));
             post.LeaseUntil = null;
             count++;
         }

@@ -1,7 +1,6 @@
 using DynamicCrawler.Core.Interfaces;
 using DynamicCrawler.Core.Models;
-using DynamicCrawler.Data.Supabase.Mappers;
-using DynamicCrawler.Data.Supabase.Models;
+using System.Text.Json;
 
 namespace DynamicCrawler.Data.Supabase.Repositories;
 
@@ -9,19 +8,18 @@ public sealed class SupabaseCommentRepository(global::Supabase.Client client) : 
 {
     public async Task ReplaceForPostAsync(long postId, IEnumerable<Comment> comments, CancellationToken ct = default)
     {
-        await client.From<SupabaseComment>()
-            .Where(comment => comment.PostId == postId)
-            .Delete()
-            .ConfigureAwait(false);
-
-        var models = comments.Select(CommentMapper.ToSupabase).ToList();
-        if (models.Count == 0)
+        var payload = comments.Select(comment => new
         {
-            return;
-        }
+            author = comment.Author,
+            content = comment.Content,
+            commented_at = comment.CommentedAt
+        }).ToList();
 
-        await client.From<SupabaseComment>()
-            .Insert(models)
+        await client.Rpc("replace_post_comments", new Dictionary<string, object>
+        {
+            ["p_post_id"] = postId,
+            ["p_comments"] = JsonSerializer.Serialize(payload)
+        })
             .ConfigureAwait(false);
     }
 }

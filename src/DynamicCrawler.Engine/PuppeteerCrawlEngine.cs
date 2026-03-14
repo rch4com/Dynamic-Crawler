@@ -74,7 +74,7 @@ public sealed class PuppeteerCrawlEngine(
             if (page is not null)
             {
                 try { await page.CloseAsync().ConfigureAwait(false); }
-                catch { /* 무시 */ }
+                catch (Exception ex) { logger.LogDebug(ex, "페이지 CloseAsync 실패 (무시됨)"); }
             }
         }
     }
@@ -137,7 +137,7 @@ public sealed class PuppeteerCrawlEngine(
             if (page is not null)
             {
                 try { await page.CloseAsync().ConfigureAwait(false); }
-                catch { /* 무시 */ }
+                catch (Exception ex) { logger.LogDebug(ex, "페이지 CloseAsync 실패 (무시됨)"); }
             }
         }
     }

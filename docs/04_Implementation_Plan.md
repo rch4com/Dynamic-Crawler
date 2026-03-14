@@ -112,30 +112,37 @@ public sealed record DownloadResult(
     string Sha256, long ByteSize, string ContentType, string LocalPath);
 
 public sealed record DiscoveredMedia(string Url, string? ContentType);
-public sealed record DiscoveredComment(string Author, string Content, DateTime? CreatedAt);
+public sealed record DiscoveredComment(string? Author, string Content, DateTime? CreatedAt);
 ```
 
 **Repository 인터페이스 (IUnitOfWork 없이 직접 주입):**
 ```csharp
 public interface IPostRepository
 {
-    Task<Result<Post>> ClaimNextAsync(string siteKey, int leaseSeconds, CancellationToken ct);
-    Task UpdateStatusAsync(long postId, PostStatus status, CancellationToken ct);
-    Task BulkUpsertAsync(IEnumerable<Post> posts, CancellationToken ct);
-    Task<int> RollbackOrphanedAsync(CancellationToken ct);
+    Task<Result<Post>> ClaimNextAsync(string siteKey, int leaseSeconds, CancellationToken ct = default);
+    Task UpdateAsync(Post post, CancellationToken ct = default);
+    Task BulkUpsertAsync(IEnumerable<Post> posts, CancellationToken ct = default);
+    Task<int> RollbackOrphanedAsync(CancellationToken ct = default);
+    Task<string?> GetExternalIdAsync(long postId, CancellationToken ct = default);
 }
 
 public interface IMediaRepository
 {
-    Task<Result<Media>> ClaimNextAsync(string siteKey, int leaseSeconds, CancellationToken ct);
-    Task UpdateAsync(Media media, CancellationToken ct);
-    Task BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct);
-    Task<bool> ExistsBySha256Async(string sha256, CancellationToken ct);
+    Task<Result<Media>> ClaimNextAsync(string siteKey, int leaseSeconds, CancellationToken ct = default);
+    Task UpdateAsync(Media media, CancellationToken ct = default);
+    Task<IReadOnlyList<Media>> BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default);
+    Task<bool> ExistsBySha256Async(string sha256, CancellationToken ct = default);
+    Task<int> RollbackOrphanedAsync(CancellationToken ct = default);
+}
+
+public interface ICommentRepository
+{
+    Task ReplaceForPostAsync(long postId, IEnumerable<Comment> comments, CancellationToken ct = default);
 }
 
 public interface ISiteRepository
 {
-    Task<IReadOnlyList<Site>> GetActiveSitesAsync(CancellationToken ct);
+    Task<IReadOnlyList<Site>> GetActiveSitesAsync(CancellationToken ct = default);
 }
 ```
 
@@ -149,15 +156,17 @@ public sealed class CrawlerSettings
     public int BrowserRecycleCount { get; set; } = 50;
     public int IdleTimeoutMinutes { get; set; } = 10;
     public int LeaseSeconds { get; set; } = 300;
+    public int MaxRetryCount { get; set; } = 3;
+    public int MaxListPages { get; set; } = 3;
 }
 ```
 
 | 파일 | 설명 |
 |------|------|
-| `Models/Site.cs, Post.cs, Media.cs, Comment.cs` | sealed POCO |
+| `Models/Site.cs, Post.cs, Media.cs, Comment.cs` | sealed POCO (Post에 UpdatedAt 포함) |
 | `Enums/PostStatus.cs, MediaStatus.cs` | 상태 enum |
 | `Common/Result.cs` | Result\<T\> 패턴 |
-| `Interfaces/I*Repository.cs` | Persistence 추상화 |
+| `Interfaces/I*Repository.cs` | Persistence 추상화 (ICommentRepository 포함) |
 | `Interfaces/ICrawlEngine.cs, ISiteStrategy.cs, IMediaDownloader.cs` | 크롤링 |
 | `Configuration/CrawlerSettings.cs` | IOptions 기반 설정 |
 | `Results/*.cs` | record DTO |
@@ -185,8 +194,7 @@ public sealed class CrawlerSettings
 |------|------|
 | `BrowserManager.cs` | sealed, IDisposable, N건 재기동 |
 | `PuppeteerCrawlEngine.cs` | `Task<Result<CrawlResult>>` 반환 |
-| `NetworkOptimizer.cs` | CDPSession 최적화 |
-| `CommentLoader.cs` | 페이지네이션 |
+| `NetworkOptimizer.cs` | Request Interception 기반 리소스 차단 |
 
 ---
 
@@ -216,7 +224,7 @@ public sealed class MediaDownloadService(
 | `MediaDownloadService.cs` | IHttpClientFactory + Polly |
 | `HashHelper.cs` | SHA256 |
 | `PathResolver.cs` | 경로 템플릿 |
-| `DedupService.cs` | SHA256 중복 방지 |
+| *(dedup 로직은 MediaDownloadService에 인라인 구현)* | SHA256 중복 방지 |
 | `ContentTypeMapper.cs` | 확장 가능 매핑 |
 
 ---
@@ -224,14 +232,17 @@ public sealed class MediaDownloadService(
 ### 6. DynamicCrawler.Orchestrator — Channel\<T\> + DB Poll 이중 파이프라인
 
 ```csharp
-// CrawlPipeline.cs — Channel<Media> 홀더 (BoundedChannel 200)
+// CrawlPipeline.cs — Channel<DownloadTask> 홀더 (BoundedChannel 200)
+// DownloadTask = Media + SiteKey + PostExternalId 메타데이터를 함께 전달하는 record
+public sealed record DownloadTask(Media Media, string SiteKey, string PostExternalId);
+
 public sealed class CrawlPipeline
 {
-    private readonly Channel<Media> _downloadChannel =
-        Channel.CreateBounded<Media>(new BoundedChannelOptions(200) { FullMode = BoundedChannelFullMode.Wait });
+    private readonly Channel<DownloadTask> _downloadChannel =
+        Channel.CreateBounded<DownloadTask>(new BoundedChannelOptions(200) { FullMode = BoundedChannelFullMode.Wait });
 
-    public ChannelWriter<Media> Writer => _downloadChannel.Writer;
-    public ChannelReader<Media> Reader => _downloadChannel.Reader;
+    public ChannelWriter<DownloadTask> Writer => _downloadChannel.Writer;
+    public ChannelReader<DownloadTask> Reader => _downloadChannel.Reader;
 }
 ```
 
@@ -246,7 +257,7 @@ public sealed class CrawlPipeline
 | `RoundRobinScheduler.cs` | Idle 회피 |
 | `CrawlOrchestrator.cs` | Channel Producer + DB Upsert |
 | `DownloadOrchestrator.cs` | Channel Consumer + DB Poll fallback |
-| `CrawlPipeline.cs` | Channel\<Media\> 파이프라인 관리 (BoundedChannel 200) |
+| `CrawlPipeline.cs` | Channel\<DownloadTask\> 파이프라인 관리 (BoundedChannel 200) |
 | `CrawlerBackgroundService.cs` | Scoped DI + Orphaned 롤백 |
 
 ---
@@ -316,6 +327,7 @@ public sealed class CrawlerBackgroundService(
 |------|------|
 | `Fakes/InMemoryPostRepository.cs` | IPostRepository 인메모리 구현 |
 | `Fakes/InMemoryMediaRepository.cs` | IMediaRepository 인메모리 구현 |
+| `Fakes/InMemoryCommentRepository.cs` | ICommentRepository 인메모리 구현 |
 | `*Tests.cs` | FluentAssertions 사용 |
 
 ---

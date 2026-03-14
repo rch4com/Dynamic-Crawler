@@ -61,7 +61,7 @@ public sealed class BrowserManager : IAsyncDisposable
         if (_browser is not null)
         {
             try { await _browser.CloseAsync().ConfigureAwait(false); }
-            catch { /* 무시 */ }
+            catch (Exception ex) { _logger.LogDebug(ex, "브라우저 CloseAsync 실패 (무시됨)"); }
             _browser = null;
         }
     }

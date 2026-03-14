@@ -6,9 +6,9 @@ namespace DynamicCrawler.Data.Supabase.Models;
 [Table("sites")]
 public sealed class SupabaseSite : BaseModel
 {
-    [PrimaryKey("id")]                   public int Id { get; set; }
+    [PrimaryKey("id", false)]             public long? Id { get; set; }
     [Column("site_key")]                 public string SiteKey { get; set; } = "";
-    [Column("base_url")]                 public new string BaseUrl { get; set; } = "";
+    [Column("base_url")]                 public string SiteBaseUrl { get; set; } = "";
     [Column("max_concurrent_collects")]  public int MaxConcurrentCollects { get; set; } = 2;
     [Column("max_concurrent_downloads")] public int MaxConcurrentDownloads { get; set; } = 4;
     [Column("is_active")]                public bool IsActive { get; set; } = true;

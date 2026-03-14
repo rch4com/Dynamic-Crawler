@@ -23,7 +23,7 @@ BEGIN
     )
     RETURNING *;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE OR REPLACE FUNCTION claim_next_media(p_site_key TEXT, p_lease_seconds INT)
 RETURNS SETOF media AS $$
@@ -45,7 +45,7 @@ BEGIN
     )
     RETURNING *;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE OR REPLACE FUNCTION rollback_orphaned_posts()
 RETURNS INT AS $$
@@ -63,7 +63,7 @@ BEGIN
     GET DIAGNOSTICS affected = ROW_COUNT;
     RETURN affected;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE OR REPLACE FUNCTION rollback_orphaned_media()
 RETURNS INT AS $$
@@ -80,7 +80,7 @@ BEGIN
     GET DIAGNOSTICS affected = ROW_COUNT;
     RETURN affected;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE OR REPLACE FUNCTION replace_post_comments(p_post_id BIGINT, p_comments JSONB)
 RETURNS VOID AS $$
@@ -95,4 +95,4 @@ BEGIN
         NULLIF(comment_item->>'commented_at', '')::timestamptz
     FROM jsonb_array_elements(COALESCE(p_comments, '[]'::jsonb)) AS comment_item;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';

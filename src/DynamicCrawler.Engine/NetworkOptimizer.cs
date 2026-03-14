@@ -18,12 +18,19 @@ public static class NetworkOptimizer
     {
         await page.SetRequestInterceptionAsync(true).ConfigureAwait(false);
 
-        page.Request += (_, e) =>
+        page.Request += async (_, e) =>
         {
-            if (BlockedTypes.Contains(e.Request.ResourceType))
-                _ = e.Request.AbortAsync();
-            else
-                _ = e.Request.ContinueAsync();
+            try
+            {
+                if (BlockedTypes.Contains(e.Request.ResourceType))
+                    await e.Request.AbortAsync().ConfigureAwait(false);
+                else
+                    await e.Request.ContinueAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // 페이지 닫힘 등으로 인한 요청 처리 실패는 무시
+            }
         };
     }
 }

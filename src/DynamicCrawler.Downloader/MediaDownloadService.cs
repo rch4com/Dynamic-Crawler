@@ -17,9 +17,10 @@ public sealed class MediaDownloadService(
     public async Task<Result<DownloadResult>> DownloadAsync(
         Media media, string siteKey, string postExternalId, CancellationToken ct = default)
     {
+        string? tempPath = null;
         try
         {
-            var tempPath = pathResolver.ResolveTempPath(siteKey, postExternalId);
+            tempPath = pathResolver.ResolveTempPath(siteKey, postExternalId);
 
             using var client = httpClientFactory.CreateClient("MediaDownloader");
             using var response = await client.GetAsync(media.MediaUrl, HttpCompletionOption.ResponseHeadersRead, ct)
@@ -45,6 +46,7 @@ public sealed class MediaDownloadService(
             if (await mediaRepo.ExistsBySha256Async(sha256, ct).ConfigureAwait(false))
             {
                 File.Delete(tempPath);
+                tempPath = null;
                 logger.LogDebug("중복 파일 스킵: SHA256={Sha256}, URL={Url}", sha256, media.MediaUrl);
                 return Result<DownloadResult>.Failure("중복 미디어 스킵", "DUPLICATE");
             }
@@ -58,6 +60,7 @@ public sealed class MediaDownloadService(
             else
                 File.Delete(tempPath);
 
+            tempPath = null;
             var byteSize = new FileInfo(finalPath).Length;
 
             return Result<DownloadResult>.Success(new DownloadResult(sha256, byteSize, contentType ?? "unknown", finalPath));
@@ -66,6 +69,14 @@ public sealed class MediaDownloadService(
         {
             logger.LogError(ex, "미디어 다운로드 실패: {Url}", media.MediaUrl);
             return Result<DownloadResult>.Failure(ex.Message, "DOWNLOAD_ERROR");
+        }
+        finally
+        {
+            if (tempPath is not null)
+            {
+                try { File.Delete(tempPath); }
+                catch { /* 임시 파일 정리 실패는 무시 */ }
+            }
         }
     }
 }

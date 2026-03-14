@@ -18,6 +18,8 @@ public sealed class DownloadOrchestrator(
 {
     private readonly CrawlerSettings _settings = settings.Value;
 
+    private int _cyclesSinceDbFallback;
+
     public async Task RunCycleAsync(CancellationToken ct)
     {
         var channelCount = 0;
@@ -27,11 +29,15 @@ public sealed class DownloadOrchestrator(
             channelCount++;
         }
 
-        if (channelCount > 0)
+        // 채널 처리 후에도 5사이클마다 DB fallback을 강제 실행하여 starvation 방지
+        _cyclesSinceDbFallback++;
+        if (channelCount > 0 && _cyclesSinceDbFallback < 5)
         {
             logger.LogInformation("Processed {Count} media items from the channel.", channelCount);
             return;
         }
+
+        _cyclesSinceDbFallback = 0;
 
         var sites = await siteRepo.GetActiveSitesAsync(ct).ConfigureAwait(false);
         if (sites.Count == 0)

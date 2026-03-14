@@ -1,29 +1,36 @@
-using DynamicCrawler.Core.Interfaces;
+using System.Collections.Immutable;
 
 namespace DynamicCrawler.Orchestrator;
 
-/// <summary>Round-robin 사이트 스케줄러 — Idle 회피</summary>
+/// <summary>Round-robin 사이트 스케줄러 — Idle 회피 (thread-safe)</summary>
 public sealed class RoundRobinScheduler
 {
-    private readonly List<string> _siteKeys = [];
+    private ImmutableArray<string> _siteKeys = [];
     private int _currentIndex;
+    private readonly object _lock = new();
 
     public void SetSiteKeys(IEnumerable<string> keys)
     {
-        _siteKeys.Clear();
-        _siteKeys.AddRange(keys);
-        _currentIndex = 0;
+        lock (_lock)
+        {
+            _siteKeys = [.. keys];
+            _currentIndex = 0;
+        }
     }
 
     /// <summary>다음 사이트 키를 반환 (라운드 로빈)</summary>
     public string? Next()
     {
-        if (_siteKeys.Count == 0) return null;
+        lock (_lock)
+        {
+            var keys = _siteKeys;
+            if (keys.Length == 0) return null;
 
-        var key = _siteKeys[_currentIndex % _siteKeys.Count];
-        _currentIndex = (_currentIndex + 1) % _siteKeys.Count;
-        return key;
+            var key = keys[_currentIndex % keys.Length];
+            _currentIndex = (_currentIndex + 1) % keys.Length;
+            return key;
+        }
     }
 
-    public int SiteCount => _siteKeys.Count;
+    public int SiteCount => _siteKeys.Length;
 }

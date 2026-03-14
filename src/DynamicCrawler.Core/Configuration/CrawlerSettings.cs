@@ -25,4 +25,10 @@ public sealed class CrawlerSettings
 
     /// <summary>크롤링 대상 페이지 목록 최대 페이지 수</summary>
     public int MaxListPages { get; set; } = 3;
+
+    /// <summary>페이지 네비게이션 타임아웃 (밀리초)</summary>
+    public int NavigationTimeoutMs { get; set; } = 30_000;
+
+    /// <summary>페이지 작업 타임아웃 (밀리초)</summary>
+    public int PageOperationTimeoutMs { get; set; } = 10_000;
 }

@@ -25,9 +25,12 @@ public sealed class ContentTypeMapper
             return ext;
 
         // 2. URL 확장자에서 추론
-        var urlExt = Path.GetExtension(new Uri(url).AbsolutePath);
-        if (!string.IsNullOrEmpty(urlExt))
-            return urlExt.ToLowerInvariant();
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            var urlExt = Path.GetExtension(uri.AbsolutePath);
+            if (!string.IsNullOrEmpty(urlExt))
+                return urlExt.ToLowerInvariant();
+        }
 
         // 3. 기본값
         return ".bin";

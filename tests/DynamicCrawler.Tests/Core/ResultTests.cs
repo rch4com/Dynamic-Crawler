@@ -22,9 +22,10 @@ public class ResultTests
         var result = Result<int>.Failure("에러 발생", "ERR_001");
 
         result.IsSuccess.Should().BeFalse();
-        result.Value.Should().Be(default);
         result.Error.Should().Be("에러 발생");
         result.ErrorCode.Should().Be("ERR_001");
+        var act = () => result.Value;
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]

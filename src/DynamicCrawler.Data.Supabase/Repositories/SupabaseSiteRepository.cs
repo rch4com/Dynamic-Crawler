@@ -10,6 +10,7 @@ public sealed class SupabaseSiteRepository(global::Supabase.Client client) : ISi
 {
     public async Task<IReadOnlyList<Site>> GetActiveSitesAsync(CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
         var response = await client.From<SupabaseSite>()
             .Where(s => s.IsActive == true)
             .Get()

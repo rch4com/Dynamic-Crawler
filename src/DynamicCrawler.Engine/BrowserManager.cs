@@ -27,7 +27,7 @@ public sealed class BrowserManager : IAsyncDisposable
         try
         {
             var shouldRecycle = _browser is null
-                || _processedCount >= _settings.BrowserRecycleCount
+                || Volatile.Read(ref _processedCount) >= _settings.BrowserRecycleCount
                 || (DateTime.UtcNow - _lastUsed).TotalMinutes > _settings.IdleTimeoutMinutes;
 
             if (shouldRecycle)
@@ -54,6 +54,8 @@ public sealed class BrowserManager : IAsyncDisposable
         }
     }
 
+    public bool IsBrowserAlive => _browser is not null && !_browser.IsClosed;
+
     public void IncrementProcessedCount() => Interlocked.Increment(ref _processedCount);
 
     private async Task DisposeBrowserAsync()
@@ -62,19 +64,22 @@ public sealed class BrowserManager : IAsyncDisposable
         {
             try { await _browser.CloseAsync().ConfigureAwait(false); }
             catch (Exception ex) { _logger.LogDebug(ex, "브라우저 CloseAsync 실패 (무시됨)"); }
-            _browser = null;
+            finally
+            {
+                try { _browser.Dispose(); } catch { }
+                _browser = null;
+            }
         }
     }
 
-    private static bool _browserDownloaded;
+    private static int _browserDownloaded;
 
     private static async Task EnsureBrowserInstalledAsync()
     {
-        if (_browserDownloaded) return;
+        if (Interlocked.CompareExchange(ref _browserDownloaded, 1, 0) == 1) return;
 
         var fetcher = new BrowserFetcher();
         await fetcher.DownloadAsync().ConfigureAwait(false);
-        _browserDownloaded = true;
     }
 
     public async ValueTask DisposeAsync()

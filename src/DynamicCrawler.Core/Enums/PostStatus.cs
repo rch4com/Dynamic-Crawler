@@ -12,7 +12,7 @@ public enum PostStatus
     /// <summary>크롤링 완료 — 미디어 추출됨</summary>
     Collected,
 
-    /// <summary>모든 미디어 다운로드 완료</summary>
+    /// <summary>모든 미디어 다운로드 완료 (스펙 문서의 'Completed'에 해당)</summary>
     Done,
 
     /// <summary>크롤링 실패</summary>

@@ -11,7 +11,7 @@ internal static class PostMapper
         ArgumentNullException.ThrowIfNull(sp);
         return new()
         {
-            Id = sp.Id ?? 0,
+            Id = sp.Id,
             SiteKey = sp.SiteKey,
             ExternalId = sp.ExternalId,
             Url = sp.Url,
@@ -30,7 +30,7 @@ internal static class PostMapper
         ArgumentNullException.ThrowIfNull(p);
         return new()
         {
-            Id = p.Id == 0 ? null : p.Id,
+            Id = p.Id,
             SiteKey = p.SiteKey,
             ExternalId = p.ExternalId,
             Url = p.Url,

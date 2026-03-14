@@ -1,14 +1,11 @@
-using DynamicCrawler.Data.Supabase.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DynamicCrawler.Data.Supabase;
 
 /// <summary>Supabase DB 연결 상태 헬스 체크</summary>
 public sealed class SupabaseHealthCheck(
     global::Supabase.Client client,
-    IOptions<SupabaseSettings> settings,
     ILogger<SupabaseHealthCheck> logger) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(
@@ -24,8 +21,7 @@ public sealed class SupabaseHealthCheck(
                 .Get()
                 .ConfigureAwait(false);
 
-            return HealthCheckResult.Healthy(
-                $"Supabase 연결 정상 ({settings.Value.Url})");
+            return HealthCheckResult.Healthy("Supabase 연결 정상");
         }
         catch (Exception ex)
         {

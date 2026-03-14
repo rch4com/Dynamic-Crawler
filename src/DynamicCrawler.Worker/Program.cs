@@ -32,8 +32,15 @@ builder.Services.AddScoped<DownloadOrchestrator>();
 builder.Services.AddHostedService<CrawlerBackgroundService>();
 
 builder.Services.AddHealthChecks()
-    .AddCheck<SupabaseHealthCheck>("supabase", tags: ["db"])
     .AddCheck<BrowserHealthCheck>("browser", tags: ["engine"]);
 
 var host = builder.Build();
+
+host.Services.GetRequiredService<IHostApplicationLifetime>()
+    .ApplicationStopping.Register(() =>
+    {
+        host.Services.GetRequiredService<BrowserManager>()
+            .DisposeAsync().AsTask().GetAwaiter().GetResult();
+    });
+
 host.Run();

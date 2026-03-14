@@ -10,7 +10,7 @@ internal static class SiteMapper
         ArgumentNullException.ThrowIfNull(ss);
         return new()
         {
-            Id = (int)(ss.Id ?? 0),
+            Id = checked((int)(ss.Id ?? 0)),
             SiteKey = ss.SiteKey,
             BaseUrl = ss.SiteBaseUrl,
             MaxConcurrentCollects = ss.MaxConcurrentCollects,

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using PuppeteerSharp;
 
 namespace DynamicCrawler.Engine;
@@ -14,7 +15,7 @@ public static class NetworkOptimizer
     ];
 
     /// <summary>페이지에 리소스 차단 인터셉터 적용</summary>
-    public static async Task ApplyAsync(IPage page)
+    public static async Task ApplyAsync(IPage page, ILogger? logger = null)
     {
         await page.SetRequestInterceptionAsync(true).ConfigureAwait(false);
 
@@ -27,9 +28,9 @@ public static class NetworkOptimizer
                 else
                     await e.Request.ContinueAsync().ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
-                // 페이지 닫힘 등으로 인한 요청 처리 실패는 무시
+                logger?.LogTrace(ex, "Request interception 실패 (무시됨)");
             }
         };
     }

@@ -1,17 +1,20 @@
+// 라이브러리 프로젝트 정책: 모든 await 호출 시 ConfigureAwait(false) 필수 적용
 namespace DynamicCrawler.Core.Common;
 
 /// <summary>비즈니스 로직 결과를 명시적으로 표현 (예외 대신 사용)</summary>
 public sealed class Result<T>
 {
+    private readonly T? _value;
+
     public bool IsSuccess { get; }
-    public T? Value { get; }
+    public T Value => IsSuccess ? _value! : throw new InvalidOperationException($"실패한 Result의 Value에 접근할 수 없습니다. Error: {Error}");
     public string? Error { get; }
     public string? ErrorCode { get; }
 
     private Result(bool isSuccess, T? value, string? error, string? errorCode)
     {
         IsSuccess = isSuccess;
-        Value = value;
+        _value = value;
         Error = error;
         ErrorCode = errorCode;
     }

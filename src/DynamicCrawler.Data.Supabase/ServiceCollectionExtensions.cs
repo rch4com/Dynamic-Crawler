@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<SupabaseSettings>(configuration.GetSection(SupabaseSettings.SectionName));
 
+        // Singleton: Supabase.Client는 내부적으로 HttpClient를 관리하므로 단일 인스턴스를 공유합니다.
         services.AddSingleton(sp =>
         {
             var settings = sp.GetRequiredService<IOptions<SupabaseSettings>>().Value;
@@ -33,6 +34,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMediaRepository, SupabaseMediaRepository>();
         services.AddScoped<ICommentRepository, SupabaseCommentRepository>();
         services.AddScoped<ISiteRepository, SupabaseSiteRepository>();
+
+        services.AddHealthChecks()
+            .AddCheck<SupabaseHealthCheck>("supabase", tags: ["db"]);
 
         return services;
     }

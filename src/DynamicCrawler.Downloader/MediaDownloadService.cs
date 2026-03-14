@@ -63,15 +63,8 @@ public sealed class MediaDownloadService(
 
             var finalPath = pathResolver.Resolve(siteKey, postExternalId, sha256, extension);
 
-            if (!File.Exists(finalPath))
-            {
-                File.Move(tempPath, finalPath, overwrite: false);
-            }
-            else
-            {
-                File.Delete(tempPath);
-            }
-
+            // SHA256이 동일하면 내용이 동일하므로 overwrite가 안전합니다 (TOCTOU 제거).
+            File.Move(tempPath, finalPath, overwrite: true);
             tempPath = null;
             var byteSize = new FileInfo(finalPath).Length;
 
@@ -88,7 +81,7 @@ public sealed class MediaDownloadService(
             if (tempPath is not null)
             {
                 try { File.Delete(tempPath); }
-                catch { /* 임시 파일 정리 실패는 무시 */ }
+                catch (Exception ex) { logger.LogDebug(ex, "임시 파일 삭제 실패: {TempPath}", tempPath); }
             }
         }
     }

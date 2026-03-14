@@ -18,8 +18,6 @@ public sealed class DownloadOrchestrator(
 {
     private readonly CrawlerSettings _settings = settings.Value;
 
-    private int _cyclesSinceDbFallback;
-
     public async Task RunCycleAsync(CancellationToken ct)
     {
         var maxConcurrency = Math.Max(1, _settings.DefaultMaxDownloads);
@@ -44,14 +42,14 @@ public sealed class DownloadOrchestrator(
         }
 
         // 채널만 계속 소비하면 DB 적체가 굶주릴 수 있어 주기적으로 fallback을 강제합니다.
-        _cyclesSinceDbFallback++;
-        if (channelCount > 0 && _cyclesSinceDbFallback < 5)
+        var cycles = pipeline.IncrementAndGetDbFallbackCycles();
+        if (channelCount > 0 && cycles < 5)
         {
             logger.LogInformation("Processed {Count} media items from the channel.", channelCount);
             return;
         }
 
-        _cyclesSinceDbFallback = 0;
+        pipeline.ResetDbFallbackCycles();
 
         var sites = await siteRepo.GetActiveSitesAsync(ct).ConfigureAwait(false);
         if (sites.Count == 0)
@@ -99,39 +97,46 @@ public sealed class DownloadOrchestrator(
 
     private async Task ProcessMediaAsync(Core.Models.Media media, string siteKey, string postExternalId, CancellationToken ct)
     {
-        var downloadResult = await downloader.DownloadAsync(media, siteKey, postExternalId, ct).ConfigureAwait(false);
-
-        if (downloadResult.IsSuccess)
+        try
         {
-            var result = downloadResult.Value!;
-            media.Sha256 = result.Sha256;
-            media.ContentType = result.ContentType;
-            media.LocalPath = result.LocalPath;
-            media.ByteSize = result.IsDuplicate ? null : result.ByteSize;
-            media.Status = result.IsDuplicate ? MediaStatus.SkippedDuplicate : MediaStatus.Downloaded;
-            media.RetryCount = 0;
-            media.NextRetryAt = null;
-            media.LeaseUntil = null;
+            var downloadResult = await downloader.DownloadAsync(media, siteKey, postExternalId, ct).ConfigureAwait(false);
 
-            await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
-            logger.LogInformation(
-                result.IsDuplicate
-                    ? "Skipped duplicate media {Url} as {Sha256}"
-                    : "Downloaded media {Url} as {Sha256}",
-                media.MediaUrl,
-                result.Sha256[..12]);
+            if (downloadResult.IsSuccess)
+            {
+                var result = downloadResult.Value!;
+                media.Sha256 = result.Sha256;
+                media.ContentType = result.ContentType;
+                media.LocalPath = result.LocalPath;
+                media.ByteSize = result.IsDuplicate ? null : result.ByteSize;
+                media.Status = result.IsDuplicate ? MediaStatus.SkippedDuplicate : MediaStatus.Downloaded;
+                media.RetryCount = 0;
+                media.NextRetryAt = null;
+                media.LeaseUntil = null;
+
+                await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
+                logger.LogInformation(
+                    result.IsDuplicate
+                        ? "Skipped duplicate media {Url} as {Sha256}"
+                        : "Downloaded media {Url} as {Sha256}",
+                    media.MediaUrl,
+                    result.Sha256[..12]);
+            }
+            else
+            {
+                media.RetryCount++;
+                media.Status = media.RetryCount >= _settings.MaxRetryCount
+                    ? MediaStatus.Failed
+                    : MediaStatus.PendingDownload;
+                media.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, media.RetryCount));
+                media.LeaseUntil = null;
+
+                await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
+                logger.LogWarning("Failed to download media {Url}: {Error}", media.MediaUrl, downloadResult.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            media.RetryCount++;
-            media.Status = media.RetryCount >= _settings.MaxRetryCount
-                ? MediaStatus.Failed
-                : MediaStatus.PendingDownload;
-            media.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, media.RetryCount));
-            media.LeaseUntil = null;
-
-            await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
-            logger.LogWarning("Failed to download media {Url}: {Error}", media.MediaUrl, downloadResult.Error);
+            logger.LogError(ex, "미디어 처리 중 예기치 않은 오류: {Url}", media.MediaUrl);
         }
     }
 }

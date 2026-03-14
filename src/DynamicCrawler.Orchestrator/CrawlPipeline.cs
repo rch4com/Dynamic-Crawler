@@ -13,6 +13,8 @@ public sealed class CrawlPipeline
             SingleReader = false
         });
 
+    private int _cyclesSinceDbFallback;
+
     /// <summary>크롤러(Producer)가 발견한 다운로드 작업을 채널에 씁니다</summary>
     public ChannelWriter<DownloadTask> Writer => _downloadChannel.Writer;
 
@@ -21,4 +23,10 @@ public sealed class CrawlPipeline
 
     /// <summary>더 이상 쓸 작업이 없음을 알립니다</summary>
     public void Complete() => _downloadChannel.Writer.TryComplete();
+
+    /// <summary>DB fallback 카운터를 1 증가시키고 증가된 값을 반환 (thread-safe)</summary>
+    public int IncrementAndGetDbFallbackCycles() => Interlocked.Increment(ref _cyclesSinceDbFallback);
+
+    /// <summary>DB fallback 카운터를 0으로 초기화 (thread-safe)</summary>
+    public void ResetDbFallbackCycles() => Interlocked.Exchange(ref _cyclesSinceDbFallback, 0);
 }

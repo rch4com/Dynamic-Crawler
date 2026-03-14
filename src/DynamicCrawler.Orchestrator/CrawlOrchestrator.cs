@@ -23,7 +23,6 @@ public sealed class CrawlOrchestrator(
     private readonly TimeSpan _discoveryCooldown = TimeSpan.FromMinutes(1);
     private readonly Dictionary<string, ISiteStrategy> _strategyMap =
         strategies.ToDictionary(strategy => strategy.SiteKey, strategy => strategy, StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, DateTime> _lastDiscoveryAt = new(StringComparer.OrdinalIgnoreCase);
 
     public async Task RunCycleAsync(CancellationToken ct)
     {
@@ -72,9 +71,10 @@ public sealed class CrawlOrchestrator(
 
             if (crawlResult.IsSuccess)
             {
+                var postId = post.Id ?? 0;
                 var comments = crawlResult.Value!.Comments.Select(comment => new Comment
                 {
-                    PostId = post.Id,
+                    PostId = postId,
                     Author = comment.Author,
                     Content = comment.Content,
                     CommentedAt = comment.CreatedAt
@@ -82,27 +82,44 @@ public sealed class CrawlOrchestrator(
 
                 var mediaList = crawlResult.Value.Media.Select(media => new Media
                 {
-                    PostId = post.Id,
+                    PostId = postId,
                     MediaUrl = media.Url,
                     ContentType = media.ContentType
                 }).ToList();
 
-                var insertedMedia = await mediaRepo.BulkInsertAsync(mediaList, ct).ConfigureAwait(false);
-                await commentRepo.ReplaceForPostAsync(post.Id, comments, ct).ConfigureAwait(false);
+                IReadOnlyList<Media> insertedMedia = [];
+                try
+                {
+                    insertedMedia = await mediaRepo.BulkInsertAsync(mediaList, ct).ConfigureAwait(false);
 
+                    foreach (var media in insertedMedia)
+                    {
+                        var task = new DownloadTask(media, siteKey, post.ExternalId);
+                        if (!pipeline.Writer.TryWrite(task))
+                        {
+                            await pipeline.Writer.WriteAsync(task, ct).ConfigureAwait(false);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "미디어 저장 실패: PostId={PostId}", post.Id ?? 0);
+                }
+
+                try
+                {
+                    await commentRepo.ReplaceForPostAsync(postId, comments, ct).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "댓글 저장 실패: PostId={PostId}", post.Id ?? 0);
+                }
+
+                // Post 상태 업데이트는 항상 실행
                 post.Status = PostStatus.Collected;
                 post.LeaseUntil = null;
                 post.UpdatedAt = DateTime.UtcNow;
                 await postRepo.UpdateAsync(post, ct).ConfigureAwait(false);
-
-                foreach (var media in insertedMedia)
-                {
-                    var task = new DownloadTask(media, siteKey, post.ExternalId);
-                    if (!pipeline.Writer.TryWrite(task))
-                    {
-                        await pipeline.Writer.WriteAsync(task, ct).ConfigureAwait(false);
-                    }
-                }
 
                 logger.LogInformation(
                     "Collected post {PostId} ({Title}) with {MediaCount} media and {CommentCount} comments.",
@@ -127,8 +144,7 @@ public sealed class CrawlOrchestrator(
 
     private async Task DiscoverPostsIfDueAsync(Site site, ISiteStrategy strategy, CancellationToken ct)
     {
-        if (_lastDiscoveryAt.TryGetValue(site.SiteKey, out var lastDiscoveryAt) &&
-            DateTime.UtcNow - lastDiscoveryAt < _discoveryCooldown)
+        if (!scheduler.ShouldDiscover(site.SiteKey, _discoveryCooldown))
         {
             return;
         }
@@ -154,7 +170,7 @@ public sealed class CrawlOrchestrator(
                 }
             }
 
-            _lastDiscoveryAt[site.SiteKey] = DateTime.UtcNow;
+            scheduler.MarkDiscovered(site.SiteKey);
         }
         catch (Exception ex)
         {

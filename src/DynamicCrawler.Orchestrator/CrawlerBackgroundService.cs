@@ -8,6 +8,7 @@ namespace DynamicCrawler.Orchestrator;
 /// <summary>크롤러 BackgroundService — Scoped 서비스 패턴 적용</summary>
 public sealed class CrawlerBackgroundService(
     IServiceProvider serviceProvider,
+    CrawlPipeline pipeline,
     ILogger<CrawlerBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,6 +57,8 @@ public sealed class CrawlerBackgroundService(
                 await Task.Delay(TimeSpan.FromSeconds(30), ct).ConfigureAwait(false);
             }
         }
+
+        pipeline.Complete();
     }
 
     /// <summary>Consumer 루프 — 다운로드 사이클을 반복 실행</summary>

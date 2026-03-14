@@ -82,7 +82,7 @@ public class InMemoryPostRepositoryTests
         _repo.Seed(new Post { SiteKey = "aagag", ExternalId = "ext-1", Url = "https://aagag.com/1" });
 
         var claimed = await _repo.ClaimNextAsync("aagag", 300);
-        var externalId = await _repo.GetExternalIdAsync(claimed.Value!.Id);
+        var externalId = await _repo.GetExternalIdAsync(claimed.Value!.Id!.Value);
 
         externalId.Should().Be("ext-1");
     }

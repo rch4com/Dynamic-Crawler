@@ -11,7 +11,7 @@ internal static class MediaMapper
         ArgumentNullException.ThrowIfNull(sm);
         return new()
         {
-            Id = sm.Id ?? 0,
+            Id = sm.Id,
             PostId = sm.PostId,
             MediaUrl = sm.MediaUrl,
             ContentType = sm.ContentType,
@@ -31,7 +31,7 @@ internal static class MediaMapper
         ArgumentNullException.ThrowIfNull(m);
         return new()
         {
-            Id = m.Id == 0 ? null : m.Id,
+            Id = m.Id,
             PostId = m.PostId,
             MediaUrl = m.MediaUrl,
             ContentType = m.ContentType,

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-14T18:21:32.822Z",
+  "updatedAt": "2026-03-14T18:36:41.681Z",
   "missions": [
     {
       "id": "session:d55821b7-eac9-4f80-96c4-32567fbb823f:none",
@@ -410,12 +410,12 @@
       ]
     },
     {
-      "id": "session:7cf0b954-24f1-42cd-a35b-61363078a216:none",
+      "id": "session:a8163bbf-791e-4535-9167-3694c54b291d:none",
       "source": "session",
       "name": "none",
       "objective": "Session mission",
-      "createdAt": "2026-03-14T18:20:00.169Z",
-      "updatedAt": "2026-03-14T18:21:32.822Z",
+      "createdAt": "2026-03-14T18:36:26.156Z",
+      "updatedAt": "2026-03-14T18:36:41.681Z",
       "status": "done",
       "workerCount": 1,
       "taskCounts": {
@@ -428,32 +428,32 @@
       },
       "agents": [
         {
-          "name": "Explore:a9081b8",
-          "role": "Explore",
-          "ownership": "a9081b82cdb2269c0",
+          "name": "claude-code-guide:ae3aa56",
+          "role": "claude-code-guide",
+          "ownership": "ae3aa56a6f31c1c5e",
           "status": "done",
           "currentStep": null,
           "latestUpdate": "completed",
           "completedSummary": null,
-          "updatedAt": "2026-03-14T18:21:32.822Z"
+          "updatedAt": "2026-03-14T18:36:41.681Z"
         }
       ],
       "timeline": [
         {
-          "id": "session-start:a9081b82cdb2269c0:2026-03-14T18:20:00.169Z",
-          "at": "2026-03-14T18:20:00.169Z",
+          "id": "session-start:ae3aa56a6f31c1c5e:2026-03-14T18:36:26.156Z",
+          "at": "2026-03-14T18:36:26.156Z",
           "kind": "update",
-          "agent": "Explore:a9081b8",
-          "detail": "started Explore:a9081b8",
-          "sourceKey": "session-start:a9081b82cdb2269c0"
+          "agent": "claude-code-guide:ae3aa56",
+          "detail": "started claude-code-guide:ae3aa56",
+          "sourceKey": "session-start:ae3aa56a6f31c1c5e"
         },
         {
-          "id": "session-stop:a9081b82cdb2269c0:2026-03-14T18:21:32.822Z",
-          "at": "2026-03-14T18:21:32.822Z",
+          "id": "session-stop:ae3aa56a6f31c1c5e:2026-03-14T18:36:41.681Z",
+          "at": "2026-03-14T18:36:41.681Z",
           "kind": "completion",
-          "agent": "Explore:a9081b8",
+          "agent": "claude-code-guide:ae3aa56",
           "detail": "completed",
-          "sourceKey": "session-stop:a9081b82cdb2269c0"
+          "sourceKey": "session-stop:ae3aa56a6f31c1c5e"
         }
       ]
     }

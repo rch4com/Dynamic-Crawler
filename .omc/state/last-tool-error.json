@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/d/sources/github/Dynamic-Crawler/src/DynamicCrawler.Core/Enums\"}",
-  "error": "EISDIR: illegal operation on a directory, read 'D:\\sources\\github\\Dynamic-Crawler\\src\\DynamicCrawler.Core\\Enums'",
-  "timestamp": "2026-03-14T18:20:44.788Z",
-  "retry_count": 2
-}

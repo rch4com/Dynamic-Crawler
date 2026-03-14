@@ -8,7 +8,8 @@
       "Bash(dotnet build DynamicCrawler.sln --verbosity quiet)",
       "Bash(dotnet test --verbosity quiet)",
       "Bash(gh pr:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''mcpServers'''', {}\\), indent=2, ensure_ascii=False\\)\\)\")"
     ]
   }
 }

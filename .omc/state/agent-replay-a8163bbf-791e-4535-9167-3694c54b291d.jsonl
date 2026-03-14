@@ -1,0 +1,2 @@
+{"t":0,"agent":"ae3aa56","agent_type":"claude-code-guide","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ae3aa56","agent_type":"claude-code-guide","event":"agent_stop","success":true,"duration_ms":15525}

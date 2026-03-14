@@ -60,14 +60,31 @@ public class InMemoryPostRepositoryTests
     }
 
     [Fact]
-    public async Task UpdateStatusAsync_ShouldUpdatePostStatus()
+    public async Task UpdateAsync_ShouldUpdatePostState()
     {
         _repo.Seed(new Post { SiteKey = "aagag", ExternalId = "1", Url = "https://aagag.com/1" });
         var claimed = await _repo.ClaimNextAsync("aagag", 300);
+        claimed.Value!.Status = PostStatus.Collected;
+        claimed.Value.RetryCount = 2;
+        claimed.Value.NextRetryAt = DateTime.UtcNow.AddMinutes(4);
+        claimed.Value.LeaseUntil = null;
 
-        await _repo.UpdateStatusAsync(claimed.Value!.Id, PostStatus.Collected);
+        await _repo.UpdateAsync(claimed.Value);
 
         _repo.Posts.First().Status.Should().Be(PostStatus.Collected);
+        _repo.Posts.First().RetryCount.Should().Be(2);
+        _repo.Posts.First().NextRetryAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetExternalIdAsync_ShouldReturnExternalId()
+    {
+        _repo.Seed(new Post { SiteKey = "aagag", ExternalId = "ext-1", Url = "https://aagag.com/1" });
+
+        var claimed = await _repo.ClaimNextAsync("aagag", 300);
+        var externalId = await _repo.GetExternalIdAsync(claimed.Value!.Id);
+
+        externalId.Should().Be("ext-1");
     }
 
     [Fact]

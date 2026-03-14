@@ -5,7 +5,6 @@ using DynamicCrawler.Core.Models;
 
 namespace DynamicCrawler.Tests.Fakes;
 
-/// <summary>InMemory Post Repository — 테스트용</summary>
 public sealed class InMemoryPostRepository : IPostRepository
 {
     private readonly List<Post> _posts = [];
@@ -21,7 +20,9 @@ public sealed class InMemoryPostRepository : IPostRepository
             (p.LeaseUntil is null || p.LeaseUntil < DateTime.UtcNow));
 
         if (post is null)
-            return Task.FromResult(Result<Post>.Failure("큐에 처리할 게시글이 없습니다", "EMPTY_QUEUE"));
+        {
+            return Task.FromResult(Result<Post>.Failure("No posts available.", "EMPTY_QUEUE"));
+        }
 
         post.Status = PostStatus.Collecting;
         post.LeaseUntil = DateTime.UtcNow.AddSeconds(leaseSeconds);
@@ -30,38 +31,42 @@ public sealed class InMemoryPostRepository : IPostRepository
         return Task.FromResult(Result<Post>.Success(post));
     }
 
-    public Task UpdateStatusAsync(long postId, PostStatus status, CancellationToken ct = default)
+    public Task UpdateAsync(Post post, CancellationToken ct = default)
     {
-        var post = _posts.FirstOrDefault(p => p.Id == postId);
-        if (post is not null)
+        var existing = _posts.FirstOrDefault(p => p.Id == post.Id);
+        if (existing is not null)
         {
-            post.Status = status;
-            post.UpdatedAt = DateTime.UtcNow;
+            existing.Status = post.Status;
+            existing.RetryCount = post.RetryCount;
+            existing.NextRetryAt = post.NextRetryAt;
+            existing.LeaseUntil = post.LeaseUntil;
+            existing.UpdatedAt = post.UpdatedAt ?? DateTime.UtcNow;
         }
+
         return Task.CompletedTask;
     }
 
     public Task BulkUpsertAsync(IEnumerable<Post> posts, CancellationToken ct = default)
     {
-        foreach (var p in posts)
+        foreach (var post in posts)
         {
-            var existing = _posts.FirstOrDefault(e =>
-                e.SiteKey == p.SiteKey && e.ExternalId == p.ExternalId);
-
-            if (existing is null)
+            var existing = _posts.FirstOrDefault(p => p.SiteKey == post.SiteKey && p.ExternalId == post.ExternalId);
+            if (existing is not null)
             {
-                var newPost = new Post
-                {
-                    Id = _nextId++,
-                    SiteKey = p.SiteKey,
-                    ExternalId = p.ExternalId,
-                    Url = p.Url,
-                    Title = p.Title,
-                    Status = p.Status
-                };
-                _posts.Add(newPost);
+                continue;
             }
+
+            _posts.Add(new Post
+            {
+                Id = _nextId++,
+                SiteKey = post.SiteKey,
+                ExternalId = post.ExternalId,
+                Url = post.Url,
+                Title = post.Title,
+                Status = post.Status
+            });
         }
+
         return Task.CompletedTask;
     }
 
@@ -74,13 +79,18 @@ public sealed class InMemoryPostRepository : IPostRepository
             post.LeaseUntil = null;
             count++;
         }
+
         return Task.FromResult(count);
     }
 
-    /// <summary>테스트용 시드 메서드</summary>
+    public Task<string?> GetExternalIdAsync(long postId, CancellationToken ct = default)
+    {
+        return Task.FromResult(_posts.FirstOrDefault(post => post.Id == postId)?.ExternalId);
+    }
+
     public void Seed(Post post)
     {
-        var seeded = new Post
+        _posts.Add(new Post
         {
             Id = _nextId++,
             SiteKey = post.SiteKey,
@@ -93,7 +103,6 @@ public sealed class InMemoryPostRepository : IPostRepository
             LeaseUntil = post.LeaseUntil,
             CreatedAt = post.CreatedAt,
             UpdatedAt = post.UpdatedAt
-        };
-        _posts.Add(seeded);
+        });
     }
 }

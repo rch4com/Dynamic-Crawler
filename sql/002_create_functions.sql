@@ -52,6 +52,7 @@ DECLARE affected INT;
 BEGIN
 UPDATE posts
 SET status = 'Discovered',
+    retry_count = retry_count + 1,
     lease_until = NULL,
     updated_at = NOW()
 WHERE status = 'Collecting'

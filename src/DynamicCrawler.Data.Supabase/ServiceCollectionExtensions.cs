@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IPostRepository, SupabasePostRepository>();
         services.AddScoped<IMediaRepository, SupabaseMediaRepository>();
+        services.AddScoped<ICommentRepository, SupabaseCommentRepository>();
         services.AddScoped<ISiteRepository, SupabaseSiteRepository>();
 
         return services;

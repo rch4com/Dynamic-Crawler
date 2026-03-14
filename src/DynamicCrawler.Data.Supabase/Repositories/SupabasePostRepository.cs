@@ -1,6 +1,5 @@
 using System.Text.Json;
 using DynamicCrawler.Core.Common;
-using DynamicCrawler.Core.Enums;
 using DynamicCrawler.Core.Interfaces;
 using DynamicCrawler.Core.Models;
 using DynamicCrawler.Data.Supabase.Mappers;
@@ -9,7 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DynamicCrawler.Data.Supabase.Repositories;
 
-/// <summary>Supabase Postgrest + RPC 기반 IPostRepository 구현</summary>
 public sealed class SupabasePostRepository(
     global::Supabase.Client client,
     ILogger<SupabasePostRepository> logger) : IPostRepository
@@ -25,7 +23,9 @@ public sealed class SupabasePostRepository(
             }).ConfigureAwait(false);
 
             if (response.Content is null || response.Content == "[]" || response.Content == "null")
-                return Result<Post>.Failure("큐에 처리할 게시글이 없습니다", "EMPTY_QUEUE");
+            {
+                return Result<Post>.Failure("No posts available.", "EMPTY_QUEUE");
+            }
 
             var posts = JsonSerializer.Deserialize<List<SupabasePost>>(response.Content, new JsonSerializerOptions
             {
@@ -33,23 +33,28 @@ public sealed class SupabasePostRepository(
             });
 
             if (posts is null || posts.Count == 0)
-                return Result<Post>.Failure("큐에 처리할 게시글이 없습니다", "EMPTY_QUEUE");
+            {
+                return Result<Post>.Failure("No posts available.", "EMPTY_QUEUE");
+            }
 
             return Result<Post>.Success(PostMapper.ToDomain(posts[0]));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "게시글 claim 실패: SiteKey={SiteKey}", siteKey);
+            logger.LogError(ex, "Failed to claim post for {SiteKey}", siteKey);
             return Result<Post>.Failure(ex.Message, "CLAIM_ERROR");
         }
     }
 
-    public async Task UpdateStatusAsync(long postId, PostStatus status, CancellationToken ct = default)
+    public async Task UpdateAsync(Post post, CancellationToken ct = default)
     {
         await client.From<SupabasePost>()
-            .Where(p => p.Id == postId)
-            .Set(p => p.Status, status.ToString())
-            .Set(p => p.UpdatedAt!.Value, DateTime.UtcNow)
+            .Where(model => model.Id == post.Id)
+            .Set(model => model.Status, post.Status.ToString())
+            .Set(model => model.RetryCount, post.RetryCount)
+            .Set(model => model.NextRetryAt!, post.NextRetryAt)
+            .Set(model => model.LeaseUntil!, post.LeaseUntil)
+            .Set(model => model.UpdatedAt!, post.UpdatedAt ?? DateTime.UtcNow)
             .Update()
             .ConfigureAwait(false);
     }
@@ -57,7 +62,10 @@ public sealed class SupabasePostRepository(
     public async Task BulkUpsertAsync(IEnumerable<Post> posts, CancellationToken ct = default)
     {
         var models = posts.Select(PostMapper.ToSupabase).ToList();
-        if (models.Count == 0) return;
+        if (models.Count == 0)
+        {
+            return;
+        }
 
         await client.From<SupabasePost>()
             .Upsert(models, new global::Supabase.Postgrest.QueryOptions { OnConflict = "site_key,external_id" })
@@ -73,8 +81,19 @@ public sealed class SupabasePostRepository(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Orphaned posts 롤백 실패");
+            logger.LogError(ex, "Failed to rollback orphaned posts");
             return 0;
         }
+    }
+
+    public async Task<string?> GetExternalIdAsync(long postId, CancellationToken ct = default)
+    {
+        var response = await client.From<SupabasePost>()
+            .Where(post => post.Id == postId)
+            .Limit(1)
+            .Get()
+            .ConfigureAwait(false);
+
+        return response.Models.FirstOrDefault()?.ExternalId;
     }
 }

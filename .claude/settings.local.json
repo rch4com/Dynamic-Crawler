@@ -6,7 +6,9 @@
       "Bash(ping -n 8 127.0.0.1)",
       "Bash(timeout /t 15 /nobreak)",
       "Bash(dotnet build DynamicCrawler.sln --verbosity quiet)",
-      "Bash(dotnet test --verbosity quiet)"
+      "Bash(dotnet test --verbosity quiet)",
+      "Bash(gh pr:*)",
+      "Bash(find:*)"
     ]
   }
 }

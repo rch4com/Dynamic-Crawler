@@ -1,0 +1,254 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1773464015733,
+  "projectRoot": "D:\\sources\\github\\Dynamic-Crawler",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "src",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 6,
+      "lastAccessed": 1773464015700,
+      "keyFiles": [
+        "01_Requirements.md",
+        "02_Architecture_and_Components.md",
+        "03_Roadmap.md",
+        "04_Implementation_Plan.md",
+        "05_Task_Checklist.md"
+      ]
+    },
+    "sql": {
+      "path": "sql",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773464015701,
+      "keyFiles": [
+        "001_create_tables.sql",
+        "002_create_functions.sql"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1773464015701,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1773464015702,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "docs\\01_Requirements.md",
+      "accessCount": 1,
+      "lastAccessed": 1773464435737,
+      "type": "file"
+    },
+    {
+      "path": "docs\\02_Architecture_and_Components.md",
+      "accessCount": 1,
+      "lastAccessed": 1773464436100,
+      "type": "file"
+    },
+    {
+      "path": "docs\\05_Task_Checklist.md",
+      "accessCount": 1,
+      "lastAccessed": 1773464436888,
+      "type": "file"
+    },
+    {
+      "path": "docs\\04_Implementation_Plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1773464437143,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Interfaces\\IPostRepository.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464441460,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Interfaces\\IMediaRepository.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464441884,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Interfaces\\ISiteStrategy.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464442278,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Interfaces\\ICrawlEngine.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464443024,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Common\\Result.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464443405,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Models\\Post.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464443780,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Models\\Media.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464444153,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Results\\CrawlResult.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464444566,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlerBackgroundService.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464450619,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlOrchestrator.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464451403,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\DownloadOrchestrator.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464451755,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\RoundRobinScheduler.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464452520,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\Program.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464452880,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\PuppeteerCrawlEngine.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464453702,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\BrowserManager.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464454057,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\NetworkOptimizer.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464454378,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\MediaDownloadService.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464460008,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\DownloaderServiceExtensions.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464460776,
+      "type": "file"
+    },
+    {
+      "path": "src\\Sites\\DynamicCrawler.Sites.Aagag\\AagagSiteStrategy.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464461146,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Configuration\\CrawlerSettings.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464461918,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Data.Supabase\\Repositories\\SupabasePostRepository.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464484935,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Data.Supabase\\Repositories\\SupabaseMediaRepository.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464485301,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Data.Supabase\\ServiceCollectionExtensions.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464486052,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
+      "accessCount": 1,
+      "lastAccessed": 1773464533177,
+      "type": "file"
+    },
+    {
+      "path": "tests\\DynamicCrawler.Tests\\IntegrationTests\\OrphanedDataRecoveryTests.cs",
+      "accessCount": 1,
+      "lastAccessed": 1773464533321,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

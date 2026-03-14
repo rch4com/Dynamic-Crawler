@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:\\\\Users\\\\rchco\\\\.claude\\\\projects\\\\D--sources-github-Dynamic-Crawler\\\\memory\\\\MEMORY.md\"}",
+  "error": "File does not exist. Note: your current working directory is D:\\sources\\github\\Dynamic-Crawler.",
+  "timestamp": "2026-03-14T05:00:24.138Z",
+  "retry_count": 1
+}

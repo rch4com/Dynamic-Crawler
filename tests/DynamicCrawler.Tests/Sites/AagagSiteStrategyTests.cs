@@ -83,6 +83,27 @@ public class AagagSiteStrategyTests
     }
 
     [Fact]
+    public void ParseMedia_ShouldNormalizeRelativeUrls()
+    {
+        var html = """
+            <html><body>
+                <div class="stag img">
+                    <img src="/uploads/image1.jpg" />
+                    <video><source src="media/video.webm" /></video>
+                </div>
+            </body></html>
+            """;
+
+        var media = _strategy.ParseMedia(html);
+
+        media.Should().HaveCount(2);
+        media[0].Url.Should().Be("https://aagag.com/uploads/image1.jpg");
+        media[0].ContentType.Should().Be("image/jpeg");
+        media[1].Url.Should().Be("https://aagag.com/media/video.webm");
+        media[1].ContentType.Should().Be("video/webm");
+    }
+
+    [Fact]
     public void ParseMedia_NoContainer_ShouldReturnEmpty()
     {
         var html = "<html><body><p>본문만 있음</p></body></html>";

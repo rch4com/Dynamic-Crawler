@@ -1,4 +1,3 @@
-using AngleSharp;
 using AngleSharp.Html.Parser;
 using DynamicCrawler.Core.Interfaces;
 using DynamicCrawler.Core.Models;
@@ -6,9 +5,11 @@ using DynamicCrawler.Core.Results;
 
 namespace DynamicCrawler.Sites.Aagag;
 
-/// <summary>aagag.com 사이트 파싱 전략</summary>
+/// <summary>aagag.com 사이트 전략 구현</summary>
 public sealed class AagagSiteStrategy : ISiteStrategy
 {
+    private static readonly Uri BaseUri = new("https://aagag.com");
+
     public string SiteKey => "aagag";
 
     public string BuildListUrl(int page) =>
@@ -23,10 +24,16 @@ public sealed class AagagSiteStrategy : ISiteStrategy
         foreach (var link in doc.QuerySelectorAll("a.article.t"))
         {
             var href = link.GetAttribute("href");
-            if (string.IsNullOrEmpty(href) || !href.Contains("idx=")) continue;
+            if (string.IsNullOrEmpty(href) || !href.Contains("idx=", StringComparison.Ordinal))
+            {
+                continue;
+            }
 
             var idx = ExtractIdx(href);
-            if (string.IsNullOrEmpty(idx)) continue;
+            if (string.IsNullOrEmpty(idx))
+            {
+                continue;
+            }
 
             var title = link.QuerySelector("span")?.TextContent?.Trim();
 
@@ -34,14 +41,14 @@ public sealed class AagagSiteStrategy : ISiteStrategy
             {
                 SiteKey = siteKey,
                 ExternalId = idx,
-                Url = $"https://aagag.com{href}",
+                Url = new Uri(BaseUri, href).ToString(),
                 Title = title
             });
         }
 
         return posts
-            .GroupBy(p => p.ExternalId)
-            .Select(g => g.First())
+            .GroupBy(post => post.ExternalId)
+            .Select(group => group.First())
             .ToList();
     }
 
@@ -52,29 +59,38 @@ public sealed class AagagSiteStrategy : ISiteStrategy
         var result = new List<DiscoveredMedia>();
 
         var container = doc.QuerySelector("div.stag.img");
-        if (container is null) return result;
+        if (container is null)
+        {
+            return result;
+        }
 
-        // 이미지
         foreach (var img in container.QuerySelectorAll("img"))
         {
             var src = img.GetAttribute("src");
-            if (string.IsNullOrEmpty(src)) continue;
-            src = NormalizeUrl(src);
-            result.Add(new DiscoveredMedia(src, GuessContentType(src)));
+            if (string.IsNullOrWhiteSpace(src))
+            {
+                continue;
+            }
+
+            var normalizedUrl = NormalizeUrl(src);
+            result.Add(new DiscoveredMedia(normalizedUrl, GuessContentType(normalizedUrl)));
         }
 
-        // 동영상 (video > source 또는 video[src])
         foreach (var video in container.QuerySelectorAll("video"))
         {
             var src = video.GetAttribute("src");
-            if (string.IsNullOrEmpty(src))
+            if (string.IsNullOrWhiteSpace(src))
             {
-                var source = video.QuerySelector("source");
-                src = source?.GetAttribute("src");
+                src = video.QuerySelector("source")?.GetAttribute("src");
             }
-            if (string.IsNullOrEmpty(src)) continue;
-            src = NormalizeUrl(src);
-            result.Add(new DiscoveredMedia(src, GuessContentType(src)));
+
+            if (string.IsNullOrWhiteSpace(src))
+            {
+                continue;
+            }
+
+            var normalizedUrl = NormalizeUrl(src);
+            result.Add(new DiscoveredMedia(normalizedUrl, GuessContentType(normalizedUrl)));
         }
 
         return result;
@@ -87,14 +103,18 @@ public sealed class AagagSiteStrategy : ISiteStrategy
         var result = new List<DiscoveredComment>();
 
         var commentArea = doc.QuerySelector("#comment");
-        if (commentArea is null) return result;
+        if (commentArea is null)
+        {
+            return result;
+        }
 
-        // aagag 댓글은 서버사이드 렌더링, 구조가 단순
         foreach (var node in commentArea.Children)
         {
             var text = node.TextContent?.Trim();
             if (!string.IsNullOrEmpty(text))
+            {
                 result.Add(new DiscoveredComment(null, text, null));
+            }
         }
 
         return result;
@@ -108,13 +128,27 @@ public sealed class AagagSiteStrategy : ISiteStrategy
 
     private static string NormalizeUrl(string url)
     {
-        if (url.StartsWith("//")) return "https:" + url;
-        return url;
+        if (url.StartsWith("//", StringComparison.Ordinal))
+        {
+            return $"https:{url}";
+        }
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.ToString();
+        }
+
+        return new Uri(BaseUri, url).ToString();
     }
 
     private static string? GuessContentType(string url)
     {
-        var ext = Path.GetExtension(new Uri(url).AbsolutePath).ToLowerInvariant();
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return null;
+        }
+
+        var ext = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
         return ext switch
         {
             ".jpg" or ".jpeg" => "image/jpeg",

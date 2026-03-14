@@ -20,8 +20,10 @@ public sealed class CrawlOrchestrator(
     ILogger<CrawlOrchestrator> logger)
 {
     private readonly CrawlerSettings _settings = settings.Value;
+    private readonly TimeSpan _discoveryCooldown = TimeSpan.FromMinutes(1);
     private readonly Dictionary<string, ISiteStrategy> _strategyMap =
         strategies.ToDictionary(strategy => strategy.SiteKey, strategy => strategy, StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, DateTime> _lastDiscoveryAt = new(StringComparer.OrdinalIgnoreCase);
 
     public async Task RunCycleAsync(CancellationToken ct)
     {
@@ -39,7 +41,7 @@ public sealed class CrawlOrchestrator(
         {
             if (_strategyMap.TryGetValue(site.SiteKey, out var strategy))
             {
-                await DiscoverPostsAsync(site, strategy, ct).ConfigureAwait(false);
+                await DiscoverPostsIfDueAsync(site, strategy, ct).ConfigureAwait(false);
             }
         }
 
@@ -123,8 +125,14 @@ public sealed class CrawlOrchestrator(
         }
     }
 
-    private async Task DiscoverPostsAsync(Site site, ISiteStrategy strategy, CancellationToken ct)
+    private async Task DiscoverPostsIfDueAsync(Site site, ISiteStrategy strategy, CancellationToken ct)
     {
+        if (_lastDiscoveryAt.TryGetValue(site.SiteKey, out var lastDiscoveryAt) &&
+            DateTime.UtcNow - lastDiscoveryAt < _discoveryCooldown)
+        {
+            return;
+        }
+
         try
         {
             for (var page = 1; page <= _settings.MaxListPages; page++)
@@ -145,6 +153,8 @@ public sealed class CrawlOrchestrator(
                     logger.LogInformation("Discovered {Count} posts from {Url}", posts.Count, listUrl);
                 }
             }
+
+            _lastDiscoveryAt[site.SiteKey] = DateTime.UtcNow;
         }
         catch (Exception ex)
         {

@@ -5,4 +5,5 @@ public sealed record DownloadResult(
     string Sha256,
     long ByteSize,
     string ContentType,
-    string LocalPath);
+    string? LocalPath,
+    bool IsDuplicate = false);

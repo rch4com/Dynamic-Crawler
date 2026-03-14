@@ -22,14 +22,28 @@ public sealed class DownloadOrchestrator(
 
     public async Task RunCycleAsync(CancellationToken ct)
     {
+        var maxConcurrency = Math.Max(1, _settings.DefaultMaxDownloads);
+        var channelTasks = new List<Task>(maxConcurrency);
         var channelCount = 0;
+
         while (pipeline.Reader.TryRead(out var task))
         {
-            await ProcessMediaAsync(task.Media, task.SiteKey, task.PostExternalId, ct).ConfigureAwait(false);
+            channelTasks.Add(ProcessMediaAsync(task.Media, task.SiteKey, task.PostExternalId, ct));
             channelCount++;
+
+            if (channelTasks.Count >= maxConcurrency)
+            {
+                await Task.WhenAll(channelTasks).ConfigureAwait(false);
+                channelTasks.Clear();
+            }
         }
 
-        // 채널 처리 후에도 5사이클마다 DB fallback을 강제 실행하여 starvation 방지
+        if (channelTasks.Count > 0)
+        {
+            await Task.WhenAll(channelTasks).ConfigureAwait(false);
+        }
+
+        // 채널만 계속 소비하면 DB 적체가 굶주릴 수 있어 주기적으로 fallback을 강제합니다.
         _cyclesSinceDbFallback++;
         if (channelCount > 0 && _cyclesSinceDbFallback < 5)
         {
@@ -48,6 +62,7 @@ public sealed class DownloadOrchestrator(
         scheduler.SetSiteKeys(sites.Select(site => site.SiteKey));
 
         var emptyCount = 0;
+        var dbTasks = new List<Task>(maxConcurrency);
         while (emptyCount < sites.Count && !ct.IsCancellationRequested)
         {
             var siteKey = scheduler.Next();
@@ -68,7 +83,17 @@ public sealed class DownloadOrchestrator(
             var postExternalId = await postRepo.GetExternalIdAsync(media.PostId, ct).ConfigureAwait(false)
                 ?? media.PostId.ToString();
 
-            await ProcessMediaAsync(media, siteKey, postExternalId, ct).ConfigureAwait(false);
+            dbTasks.Add(ProcessMediaAsync(media, siteKey, postExternalId, ct));
+            if (dbTasks.Count >= maxConcurrency)
+            {
+                await Task.WhenAll(dbTasks).ConfigureAwait(false);
+                dbTasks.Clear();
+            }
+        }
+
+        if (dbTasks.Count > 0)
+        {
+            await Task.WhenAll(dbTasks).ConfigureAwait(false);
         }
     }
 
@@ -80,15 +105,21 @@ public sealed class DownloadOrchestrator(
         {
             var result = downloadResult.Value!;
             media.Sha256 = result.Sha256;
-            media.ByteSize = result.ByteSize;
             media.ContentType = result.ContentType;
             media.LocalPath = result.LocalPath;
-            media.Status = MediaStatus.Downloaded;
+            media.ByteSize = result.IsDuplicate ? null : result.ByteSize;
+            media.Status = result.IsDuplicate ? MediaStatus.SkippedDuplicate : MediaStatus.Downloaded;
+            media.RetryCount = 0;
             media.NextRetryAt = null;
             media.LeaseUntil = null;
 
             await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
-            logger.LogInformation("Downloaded media {Url} as {Sha256}", media.MediaUrl, result.Sha256[..12]);
+            logger.LogInformation(
+                result.IsDuplicate
+                    ? "Skipped duplicate media {Url} as {Sha256}"
+                    : "Downloaded media {Url} as {Sha256}",
+                media.MediaUrl,
+                result.Sha256[..12]);
         }
         else
         {

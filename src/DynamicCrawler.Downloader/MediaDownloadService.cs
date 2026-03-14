@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DynamicCrawler.Downloader;
 
-/// <summary>미디어 다운로드 서비스 — IHttpClientFactory + SHA256 해싱 + dedup</summary>
+/// <summary>미디어 다운로드 서비스. 재시도 정책, SHA256 계산, dedup을 담당합니다.</summary>
 public sealed class MediaDownloadService(
     IHttpClientFactory httpClientFactory,
     IMediaRepository mediaRepo,
@@ -27,43 +27,56 @@ public sealed class MediaDownloadService(
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
+            {
                 return Result<DownloadResult>.Failure(
-                    $"HTTP {(int)response.StatusCode}: {media.MediaUrl}", "HTTP_ERROR");
+                    $"HTTP {(int)response.StatusCode}: {media.MediaUrl}",
+                    "HTTP_ERROR");
+            }
 
             var contentType = response.Content.Headers.ContentType?.MediaType ?? media.ContentType;
+            var extension = contentTypeMapper.GetExtension(contentType, media.MediaUrl);
 
-            // 스트림 → 임시 파일 저장
+            // 스트림을 임시 파일로 저장한 뒤 해시를 계산합니다.
             await using (var sourceStream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false))
             await using (var fileStream = File.Create(tempPath))
             {
                 await sourceStream.CopyToAsync(fileStream, ct).ConfigureAwait(false);
             }
 
-            // SHA256 해싱
             var sha256 = await HashHelper.ComputeSha256FromFileAsync(tempPath, ct).ConfigureAwait(false);
 
-            // dedup 확인
             if (await mediaRepo.ExistsBySha256Async(sha256, ct).ConfigureAwait(false))
             {
                 File.Delete(tempPath);
                 tempPath = null;
-                logger.LogDebug("중복 파일 스킵: SHA256={Sha256}, URL={Url}", sha256, media.MediaUrl);
-                return Result<DownloadResult>.Failure("중복 미디어 스킵", "DUPLICATE");
+
+                logger.LogInformation("중복 미디어를 건너뜁니다. SHA256={Sha256}, URL={Url}", sha256, media.MediaUrl);
+
+                return Result<DownloadResult>.Success(
+                    new DownloadResult(
+                        sha256,
+                        0,
+                        contentType ?? "unknown",
+                        null,
+                        IsDuplicate: true));
             }
 
-            // 최종 경로로 이동
-            var extension = contentTypeMapper.GetExtension(contentType, media.MediaUrl);
             var finalPath = pathResolver.Resolve(siteKey, postExternalId, sha256, extension);
 
             if (!File.Exists(finalPath))
+            {
                 File.Move(tempPath, finalPath, overwrite: false);
+            }
             else
+            {
                 File.Delete(tempPath);
+            }
 
             tempPath = null;
             var byteSize = new FileInfo(finalPath).Length;
 
-            return Result<DownloadResult>.Success(new DownloadResult(sha256, byteSize, contentType ?? "unknown", finalPath));
+            return Result<DownloadResult>.Success(
+                new DownloadResult(sha256, byteSize, contentType ?? "unknown", finalPath));
         }
         catch (Exception ex)
         {

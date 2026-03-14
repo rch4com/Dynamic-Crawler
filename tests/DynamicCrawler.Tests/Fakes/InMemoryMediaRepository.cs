@@ -44,8 +44,9 @@ public sealed class InMemoryMediaRepository : IMediaRepository
         return Task.CompletedTask;
     }
 
-    public Task BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default)
+    public Task<IReadOnlyList<Media>> BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default)
     {
+        var inserted = new List<Media>();
         foreach (var m in mediaList)
         {
             var newMedia = new Media
@@ -57,8 +58,9 @@ public sealed class InMemoryMediaRepository : IMediaRepository
                 Status = m.Status
             };
             _media.Add(newMedia);
+            inserted.Add(newMedia);
         }
-        return Task.CompletedTask;
+        return Task.FromResult<IReadOnlyList<Media>>(inserted);
     }
 
     public Task<bool> ExistsBySha256Async(string sha256, CancellationToken ct = default)

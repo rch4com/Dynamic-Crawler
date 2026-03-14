@@ -18,21 +18,39 @@ public sealed class PuppeteerCrawlEngine(
         try
         {
             var browser = await browserManager.GetBrowserAsync(ct).ConfigureAwait(false);
-            page = await browser.NewPageAsync().ConfigureAwait(false);
+
+            var newPageTask = browser.NewPageAsync();
+            var completedNewPage = await Task.WhenAny(newPageTask, Task.Delay(10_000, ct)).ConfigureAwait(false);
+            if (completedNewPage != newPageTask)
+                throw new TimeoutException($"NewPageAsync timed out after 10s: {post.Url}");
+
+            page = await newPageTask.ConfigureAwait(false);
 
             await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36").ConfigureAwait(false);
 
             // 네트워크 최적화: CSS/폰트/이미지/미디어 차단, XHR/Fetch 허용
             await NetworkOptimizer.ApplyAsync(page).ConfigureAwait(false);
 
-            await page.GoToAsync(post.Url, new NavigationOptions
+            var navigationTask = page.GoToAsync(post.Url, new NavigationOptions
             {
-                WaitUntil = [WaitUntilNavigation.DOMContentLoaded],
+                WaitUntil = [WaitUntilNavigation.Networkidle2],
                 Timeout = 30_000
-            }).ConfigureAwait(false);
+            });
+
+            var timeoutTask = Task.Delay(30_000, ct);
+            var completedTask = await Task.WhenAny(navigationTask, timeoutTask).ConfigureAwait(false);
+            if (completedTask == timeoutTask)
+                throw new TimeoutException($"Navigation timed out after 30s: {post.Url}");
+
+            await navigationTask.ConfigureAwait(false);
 
             // DOM HTML 추출
-            var html = await page.GetContentAsync().ConfigureAwait(false);
+            var contentTask = page.GetContentAsync();
+            completedTask = await Task.WhenAny(contentTask, Task.Delay(10_000, ct)).ConfigureAwait(false);
+            if (completedTask != contentTask)
+                throw new TimeoutException($"GetContentAsync timed out after 10s: {post.Url}");
+
+            var html = await contentTask.ConfigureAwait(false);
 
             // ISiteStrategy에 파싱 위임
             var media = strategy.ParseMedia(html);

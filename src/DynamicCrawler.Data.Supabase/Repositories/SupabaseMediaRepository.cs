@@ -66,14 +66,16 @@ public sealed class SupabaseMediaRepository(
         await query.Update().ConfigureAwait(false);
     }
 
-    public async Task BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Media>> BulkInsertAsync(IEnumerable<Media> mediaList, CancellationToken ct = default)
     {
         var models = mediaList.Select(MediaMapper.ToSupabase).ToList();
-        if (models.Count == 0) return;
+        if (models.Count == 0) return [];
 
-        await client.From<SupabaseMedia>()
+        var response = await client.From<SupabaseMedia>()
             .Insert(models)
             .ConfigureAwait(false);
+
+        return response.Models.Select(MediaMapper.ToDomain).ToList();
     }
 
     public async Task<bool> ExistsBySha256Async(string sha256, CancellationToken ct = default)

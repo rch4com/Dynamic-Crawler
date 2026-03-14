@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace DynamicCrawler.Orchestrator;
 
-/// <summary>다운로드 오케스트레이터 — Channel&lt;Media&gt; Consumer + DB Poll 이중 처리</summary>
+/// <summary>다운로드 오케스트레이터 — Channel&lt;DownloadTask&gt; Consumer + DB Poll 이중 처리</summary>
 public sealed class DownloadOrchestrator(
     IMediaRepository mediaRepo,
     ISiteRepository siteRepo,
@@ -21,11 +21,11 @@ public sealed class DownloadOrchestrator(
     /// <summary>1 사이클: Channel에서 미디어를 읽어 다운로드 (없으면 DB poll fallback)</summary>
     public async Task RunCycleAsync(CancellationToken ct)
     {
-        // 1단계: Channel에서 즉시 처리
+        // 1단계: Channel에서 즉시 처리 (DownloadTask에 SiteKey, PostExternalId 포함)
         var channelCount = 0;
-        while (pipeline.Reader.TryRead(out var channelMedia))
+        while (pipeline.Reader.TryRead(out var task))
         {
-            await ProcessMediaAsync(channelMedia, channelMedia.MediaUrl.Contains("aagag") ? "aagag" : "unknown", ct)
+            await ProcessMediaAsync(task.Media, task.SiteKey, task.PostExternalId, ct)
                 .ConfigureAwait(false);
             channelCount++;
         }
@@ -56,14 +56,15 @@ public sealed class DownloadOrchestrator(
             }
 
             emptyCount = 0;
-            await ProcessMediaAsync(claimResult.Value!, siteKey, ct).ConfigureAwait(false);
+            await ProcessMediaAsync(claimResult.Value!, siteKey, claimResult.Value!.PostId.ToString(), ct)
+                .ConfigureAwait(false);
         }
     }
 
-    private async Task ProcessMediaAsync(Core.Models.Media media, string siteKey, CancellationToken ct)
+    private async Task ProcessMediaAsync(Core.Models.Media media, string siteKey, string postExternalId, CancellationToken ct)
     {
         var downloadResult = await downloader.DownloadAsync(
-            media, siteKey, media.PostId.ToString(), ct).ConfigureAwait(false);
+            media, siteKey, postExternalId, ct).ConfigureAwait(false);
 
         if (downloadResult.IsSuccess)
         {

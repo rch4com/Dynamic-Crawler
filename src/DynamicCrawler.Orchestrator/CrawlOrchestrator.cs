@@ -78,18 +78,19 @@ public sealed class CrawlOrchestrator(
                     ContentType = m.ContentType
                 }).ToList();
 
-                await mediaRepo.BulkInsertAsync(mediaList, ct).ConfigureAwait(false);
+                var insertedMedia = await mediaRepo.BulkInsertAsync(mediaList, ct).ConfigureAwait(false);
                 await postRepo.UpdateStatusAsync(post.Id, PostStatus.Collected, ct).ConfigureAwait(false);
 
-                // Channel에 Write → DownloadOrchestrator가 즉시 처리
-                foreach (var media in mediaList)
+                // Channel에 Write → DownloadOrchestrator가 즉시 처리 (DB 할당 ID 포함)
+                foreach (var media in insertedMedia)
                 {
-                    if (!pipeline.Writer.TryWrite(media))
-                        await pipeline.Writer.WriteAsync(media, ct).ConfigureAwait(false);
+                    var task = new DownloadTask(media, siteKey, post.ExternalId);
+                    if (!pipeline.Writer.TryWrite(task))
+                        await pipeline.Writer.WriteAsync(task, ct).ConfigureAwait(false);
                 }
 
                 logger.LogInformation("게시글 수집 완료: {PostId} ({Title}) / 미디어 {Count}건 → Channel",
-                    post.Id, post.Title, mediaList.Count);
+                    post.Id, post.Title, insertedMedia.Count);
             }
             else
             {

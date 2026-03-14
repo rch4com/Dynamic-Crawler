@@ -66,10 +66,15 @@ public sealed class BrowserManager : IAsyncDisposable
         }
     }
 
+    private static bool _browserDownloaded;
+
     private static async Task EnsureBrowserInstalledAsync()
     {
+        if (_browserDownloaded) return;
+
         var fetcher = new BrowserFetcher();
         await fetcher.DownloadAsync().ConfigureAwait(false);
+        _browserDownloaded = true;
     }
 
     public async ValueTask DisposeAsync()

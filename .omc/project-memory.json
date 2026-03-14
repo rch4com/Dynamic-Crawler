@@ -76,177 +76,237 @@
   },
   "hotPaths": [
     {
-      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
-      "accessCount": 2,
-      "lastAccessed": 1773466144463,
-      "type": "file"
-    },
-    {
-      "path": "docs\\01_Requirements.md",
-      "accessCount": 1,
-      "lastAccessed": 1773464435737,
-      "type": "file"
-    },
-    {
-      "path": "docs\\02_Architecture_and_Components.md",
-      "accessCount": 1,
-      "lastAccessed": 1773464436100,
-      "type": "file"
-    },
-    {
-      "path": "docs\\05_Task_Checklist.md",
-      "accessCount": 1,
-      "lastAccessed": 1773464436888,
-      "type": "file"
-    },
-    {
-      "path": "docs\\04_Implementation_Plan.md",
-      "accessCount": 1,
-      "lastAccessed": 1773464437143,
-      "type": "file"
-    },
-    {
       "path": "src\\DynamicCrawler.Core\\Interfaces\\IPostRepository.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464441460,
+      "accessCount": 5,
+      "lastAccessed": 1773467152193,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Interfaces\\IMediaRepository.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464441884,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Core\\Interfaces\\ISiteStrategy.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464442278,
+      "accessCount": 5,
+      "lastAccessed": 1773467152675,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Interfaces\\ICrawlEngine.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464443024,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Core\\Common\\Result.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464443405,
+      "accessCount": 5,
+      "lastAccessed": 1773467153971,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Models\\Post.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464443780,
+      "accessCount": 5,
+      "lastAccessed": 1773467155341,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Models\\Media.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464444153,
+      "accessCount": 5,
+      "lastAccessed": 1773467155398,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Common\\Result.cs",
+      "accessCount": 5,
+      "lastAccessed": 1773467157258,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Results\\CrawlResult.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464444566,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\CrawlerBackgroundService.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464450619,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\CrawlOrchestrator.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464451403,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\DownloadOrchestrator.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464451755,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\RoundRobinScheduler.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464452520,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Worker\\Program.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464452880,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Engine\\PuppeteerCrawlEngine.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464453702,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Engine\\BrowserManager.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464454057,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Engine\\NetworkOptimizer.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464454378,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Downloader\\MediaDownloadService.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464460008,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Downloader\\DownloaderServiceExtensions.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464460776,
-      "type": "file"
-    },
-    {
-      "path": "src\\Sites\\DynamicCrawler.Sites.Aagag\\AagagSiteStrategy.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464461146,
+      "accessCount": 5,
+      "lastAccessed": 1773467158156,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Core\\Configuration\\CrawlerSettings.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464461918,
+      "accessCount": 5,
+      "lastAccessed": 1773467158901,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\Interfaces\\ISiteStrategy.cs",
+      "accessCount": 4,
+      "lastAccessed": 1773467153222,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\Program.cs",
+      "accessCount": 4,
+      "lastAccessed": 1773467336763,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlerBackgroundService.cs",
+      "accessCount": 4,
+      "lastAccessed": 1773467336780,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\MediaDownloadService.cs",
+      "accessCount": 4,
+      "lastAccessed": 1773467336819,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
+      "accessCount": 4,
+      "lastAccessed": 1773467347169,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1773466787240,
+      "type": "directory"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\DynamicCrawler.Worker.csproj",
+      "accessCount": 3,
+      "lastAccessed": 1773467021176,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Data.Supabase\\Repositories\\SupabasePostRepository.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464484935,
+      "accessCount": 3,
+      "lastAccessed": 1773467100831,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Data.Supabase\\Repositories\\SupabaseMediaRepository.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464485301,
+      "accessCount": 3,
+      "lastAccessed": 1773467101606,
       "type": "file"
     },
     {
       "path": "src\\DynamicCrawler.Data.Supabase\\ServiceCollectionExtensions.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464486052,
+      "accessCount": 3,
+      "lastAccessed": 1773467101641,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\BrowserManager.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467105557,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\PuppeteerCrawlEngine.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467106461,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\NetworkOptimizer.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467106897,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\DownloaderServiceExtensions.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467109440,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\RoundRobinScheduler.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467114576,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\DownloadOrchestrator.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467115820,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlOrchestrator.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467116277,
+      "type": "file"
+    },
+    {
+      "path": "src\\Sites\\DynamicCrawler.Sites.Aagag\\AagagSiteStrategy.cs",
+      "accessCount": 3,
+      "lastAccessed": 1773467117356,
       "type": "file"
     },
     {
       "path": "tests\\DynamicCrawler.Tests\\IntegrationTests\\OrphanedDataRecoveryTests.cs",
-      "accessCount": 1,
-      "lastAccessed": 1773464533321,
+      "accessCount": 3,
+      "lastAccessed": 1773467125450,
+      "type": "file"
+    },
+    {
+      "path": "docs\\02_Architecture_and_Components.md",
+      "accessCount": 3,
+      "lastAccessed": 1773467135419,
+      "type": "file"
+    },
+    {
+      "path": "docs\\01_Requirements.md",
+      "accessCount": 2,
+      "lastAccessed": 1773466785242,
+      "type": "file"
+    },
+    {
+      "path": "docs\\04_Implementation_Plan.md",
+      "accessCount": 2,
+      "lastAccessed": 1773466785951,
+      "type": "file"
+    },
+    {
+      "path": "docs\\05_Task_Checklist.md",
+      "accessCount": 2,
+      "lastAccessed": 1773466786077,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\DynamicCrawler.Core.csproj",
+      "accessCount": 2,
+      "lastAccessed": 1773467018761,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Data.Supabase\\DynamicCrawler.Data.Supabase.csproj",
+      "accessCount": 2,
+      "lastAccessed": 1773467019214,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\DynamicCrawler.Engine.csproj",
+      "accessCount": 2,
+      "lastAccessed": 1773467019710,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\DynamicCrawler.Downloader.csproj",
+      "accessCount": 2,
+      "lastAccessed": 1773467020572,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\DynamicCrawler.Orchestrator.csproj",
+      "accessCount": 2,
+      "lastAccessed": 1773467021003,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Data.Supabase\\README.md",
+      "accessCount": 2,
+      "lastAccessed": 1773467134156,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Engine\\README.md",
+      "accessCount": 2,
+      "lastAccessed": 1773467134641,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\README.md",
+      "accessCount": 2,
+      "lastAccessed": 1773467135166,
       "type": "file"
     },
     {
@@ -256,9 +316,63 @@
       "type": "file"
     },
     {
-      "path": "src\\DynamicCrawler.Worker\\DynamicCrawler.Worker.csproj",
+      "path": "docs\\03_Roadmap.md",
       "accessCount": 1,
-      "lastAccessed": 1773466144702,
+      "lastAccessed": 1773466785818,
+      "type": "file"
+    },
+    {
+      "path": "docs\\06_Walkthrough.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466786216,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466789465,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Core\\README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466789684,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466790551,
+      "type": "file"
+    },
+    {
+      "path": "src\\Sites\\DynamicCrawler.Sites.Aagag\\README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466790748,
+      "type": "file"
+    },
+    {
+      "path": "tests\\DynamicCrawler.Tests\\README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466790959,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\README.md",
+      "accessCount": 1,
+      "lastAccessed": 1773466791138,
+      "type": "file"
+    },
+    {
+      "path": "DynamicCrawler.sln",
+      "accessCount": 1,
+      "lastAccessed": 1773466795612,
+      "type": "file"
+    },
+    {
+      "path": "src\\Sites\\DynamicCrawler.Sites.Aagag\\DynamicCrawler.Sites.Aagag.csproj",
+      "accessCount": 1,
+      "lastAccessed": 1773466797844,
       "type": "file"
     }
   ],

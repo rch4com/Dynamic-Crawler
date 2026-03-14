@@ -46,6 +46,7 @@ public sealed class MediaDownloadService(
             {
                 File.Delete(tempPath);
                 logger.LogDebug("중복 파일 스킵: SHA256={Sha256}, URL={Url}", sha256, media.MediaUrl);
+                return Result<DownloadResult>.Failure("중복 미디어 스킵", "DUPLICATE");
             }
 
             // 최종 경로로 이동

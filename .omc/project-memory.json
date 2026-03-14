@@ -76,6 +76,24 @@
   },
   "hotPaths": [
     {
+      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
+      "accessCount": 8,
+      "lastAccessed": 1773472237962,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Downloader\\MediaDownloadService.cs",
+      "accessCount": 7,
+      "lastAccessed": 1773470050554,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlerBackgroundService.cs",
+      "accessCount": 7,
+      "lastAccessed": 1773470082000,
+      "type": "file"
+    },
+    {
       "path": "src\\DynamicCrawler.Core\\Interfaces\\IPostRepository.cs",
       "accessCount": 5,
       "lastAccessed": 1773467152193,
@@ -124,33 +142,27 @@
       "type": "file"
     },
     {
+      "path": "src\\DynamicCrawler.Worker\\Program.cs",
+      "accessCount": 5,
+      "lastAccessed": 1773469895706,
+      "type": "file"
+    },
+    {
       "path": "src\\DynamicCrawler.Core\\Interfaces\\ISiteStrategy.cs",
       "accessCount": 4,
       "lastAccessed": 1773467153222,
       "type": "file"
     },
     {
-      "path": "src\\DynamicCrawler.Worker\\Program.cs",
+      "path": "src\\DynamicCrawler.Orchestrator\\CrawlOrchestrator.cs",
       "accessCount": 4,
-      "lastAccessed": 1773467336763,
+      "lastAccessed": 1773469897038,
       "type": "file"
     },
     {
-      "path": "src\\DynamicCrawler.Orchestrator\\CrawlerBackgroundService.cs",
+      "path": "src\\DynamicCrawler.Orchestrator\\DownloadOrchestrator.cs",
       "accessCount": 4,
-      "lastAccessed": 1773467336780,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Downloader\\MediaDownloadService.cs",
-      "accessCount": 4,
-      "lastAccessed": 1773467336819,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
-      "accessCount": 4,
-      "lastAccessed": 1773467347169,
+      "lastAccessed": 1773469897175,
       "type": "file"
     },
     {
@@ -211,18 +223,6 @@
       "path": "src\\DynamicCrawler.Orchestrator\\RoundRobinScheduler.cs",
       "accessCount": 3,
       "lastAccessed": 1773467114576,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\DownloadOrchestrator.cs",
-      "accessCount": 3,
-      "lastAccessed": 1773467115820,
-      "type": "file"
-    },
-    {
-      "path": "src\\DynamicCrawler.Orchestrator\\CrawlOrchestrator.cs",
-      "accessCount": 3,
-      "lastAccessed": 1773467116277,
       "type": "file"
     },
     {

@@ -26,31 +26,59 @@ public sealed class CrawlerBackgroundService(
             logger.LogInformation("Orphaned 롤백 완료: Posts={PostCount}, Media={MediaCount}", postRolled, mediaRolled);
         }
 
-        while (!stoppingToken.IsCancellationRequested)
+        // Producer(크롤링)와 Consumer(다운로드)를 별도 스코프에서 병렬 실행
+        var crawlTask = RunProducerLoopAsync(stoppingToken);
+        var downloadTask = RunConsumerLoopAsync(stoppingToken);
+
+        await Task.WhenAll(crawlTask, downloadTask).ConfigureAwait(false);
+    }
+
+    /// <summary>Producer 루프 — 크롤링 사이클을 반복 실행</summary>
+    private async Task RunProducerLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
         {
             try
             {
                 using var scope = serviceProvider.CreateScope();
-
-                // 크롤링 사이클
                 var crawlOrch = scope.ServiceProvider.GetRequiredService<CrawlOrchestrator>();
-                await crawlOrch.RunCycleAsync(stoppingToken).ConfigureAwait(false);
+                await crawlOrch.RunCycleAsync(ct).ConfigureAwait(false);
 
-                // 다운로드 사이클
-                var dlOrch = scope.ServiceProvider.GetRequiredService<DownloadOrchestrator>();
-                await dlOrch.RunCycleAsync(stoppingToken).ConfigureAwait(false);
-
-                // 다음 사이클까지 대기
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 break;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "사이클 실행 중 예외 발생. 30초 후 재시도...");
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken).ConfigureAwait(false);
+                logger.LogError(ex, "크롤링 사이클 예외 발생. 30초 후 재시도...");
+                await Task.Delay(TimeSpan.FromSeconds(30), ct).ConfigureAwait(false);
+            }
+        }
+    }
+
+    /// <summary>Consumer 루프 — 다운로드 사이클을 반복 실행</summary>
+    private async Task RunConsumerLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                using var scope = serviceProvider.CreateScope();
+                var dlOrch = scope.ServiceProvider.GetRequiredService<DownloadOrchestrator>();
+                await dlOrch.RunCycleAsync(ct).ConfigureAwait(false);
+
+                await Task.Delay(TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "다운로드 사이클 예외 발생. 30초 후 재시도...");
+                await Task.Delay(TimeSpan.FromSeconds(30), ct).ConfigureAwait(false);
             }
         }
 

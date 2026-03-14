@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace DynamicCrawler.Orchestrator;
 
-/// <summary>크롤링 오케스트레이터 — discover → claim → crawl → 미디어 등록</summary>
+/// <summary>크롤링 오케스트레이터 — discover → claim → crawl → 미디어 등록 → Channel Write</summary>
 public sealed class CrawlOrchestrator(
     IPostRepository postRepo,
     IMediaRepository mediaRepo,
@@ -15,6 +15,7 @@ public sealed class CrawlOrchestrator(
     ICrawlEngine crawlEngine,
     IEnumerable<ISiteStrategy> strategies,
     RoundRobinScheduler scheduler,
+    CrawlPipeline pipeline,
     IOptions<CrawlerSettings> settings,
     ILogger<CrawlOrchestrator> logger)
 {
@@ -75,12 +76,20 @@ public sealed class CrawlOrchestrator(
                     PostId = post.Id,
                     MediaUrl = m.Url,
                     ContentType = m.ContentType
-                });
+                }).ToList();
 
                 await mediaRepo.BulkInsertAsync(mediaList, ct).ConfigureAwait(false);
                 await postRepo.UpdateStatusAsync(post.Id, PostStatus.Collected, ct).ConfigureAwait(false);
 
-                logger.LogInformation("게시글 수집 완료: {PostId} ({Title})", post.Id, post.Title);
+                // Channel에 Write → DownloadOrchestrator가 즉시 처리
+                foreach (var media in mediaList)
+                {
+                    if (!pipeline.Writer.TryWrite(media))
+                        await pipeline.Writer.WriteAsync(media, ct).ConfigureAwait(false);
+                }
+
+                logger.LogInformation("게시글 수집 완료: {PostId} ({Title}) / 미디어 {Count}건 → Channel",
+                    post.Id, post.Title, mediaList.Count);
             }
             else
             {

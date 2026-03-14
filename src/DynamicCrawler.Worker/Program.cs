@@ -10,8 +10,8 @@ using Serilog;
 var builder = Host.CreateApplicationBuilder(args);
 
 // Serilog 구조적 로깅
-builder.Services.AddSerilog(config => config
-    .ReadFrom.Configuration(builder.Configuration));
+builder.Services.AddSerilog(config =>
+    config.ReadFrom.Configuration(builder.Configuration));
 
 // Windows Service 지원
 builder.Services.AddWindowsService();
@@ -35,9 +35,15 @@ builder.Services.AddAagagSiteStrategy();
 
 // Orchestrator
 builder.Services.AddSingleton<RoundRobinScheduler>();
+builder.Services.AddSingleton<CrawlPipeline>();   // Channel<Media> 파이프라인
 builder.Services.AddScoped<CrawlOrchestrator>();
 builder.Services.AddScoped<DownloadOrchestrator>();
 builder.Services.AddHostedService<CrawlerBackgroundService>();
+
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck<SupabaseHealthCheck>("supabase", tags: ["db"])
+    .AddCheck<BrowserHealthCheck>("browser", tags: ["engine"]);
 
 var host = builder.Build();
 host.Run();

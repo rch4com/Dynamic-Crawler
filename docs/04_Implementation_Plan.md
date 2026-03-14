@@ -221,30 +221,33 @@ public sealed class MediaDownloadService(
 
 ---
 
-### 6. DynamicCrawler.Orchestrator — ★ Channel\<T\> 파이프라인
+### 6. DynamicCrawler.Orchestrator — Channel\<T\> + DB Poll 이중 파이프라인
 
 ```csharp
-// 크롤링 → 다운로드 간 Channel 파이프라인
+// CrawlPipeline.cs — Channel<Media> 홀더 (BoundedChannel 200)
 public sealed class CrawlPipeline
 {
     private readonly Channel<Media> _downloadChannel =
-        Channel.CreateBounded<Media>(new BoundedChannelOptions(100)
-        {
-            FullMode = BoundedChannelFullMode.Wait
-        });
+        Channel.CreateBounded<Media>(new BoundedChannelOptions(200) { FullMode = BoundedChannelFullMode.Wait });
 
-    // Producer: 크롤러가 미디어 발견 → channel 쓰기
-    // Consumer: 다운로더가 channel 읽기 → 병렬 다운로드
+    public ChannelWriter<Media> Writer => _downloadChannel.Writer;
+    public ChannelReader<Media> Reader => _downloadChannel.Reader;
 }
 ```
+
+**처리 흐름:**
+1. `CrawlOrchestrator`: 미디어 발견 → DB `BulkInsert` → `Channel.Write` (즉시 큐잉)
+2. `DownloadOrchestrator`: `Channel.TryRead` 우선 → 없으면 DB `ClaimNextAsync` fallback
+
+> **이 이중 방식의 장점**: 단일 프로세스 내에서는 Channel로 즉각 처리하고, 다중 Worker 분산 환경에서는 DB 폴링 방식으로 안전하게 작동합니다.
 
 | 파일 | 설명 |
 |------|------|
 | `RoundRobinScheduler.cs` | Idle 회피 |
-| `CrawlOrchestrator.cs` | Channel Producer |
-| `DownloadOrchestrator.cs` | Channel Consumer |
-| `CrawlPipeline.cs` | Channel\<T\> 파이프라인 관리 |
-| `SiteStrategyRegistry.cs` | ISiteStrategy 자동 발견 |
+| `CrawlOrchestrator.cs` | Channel Producer + DB Upsert |
+| `DownloadOrchestrator.cs` | Channel Consumer + DB Poll fallback |
+| `CrawlPipeline.cs` | Channel\<Media\> 파이프라인 관리 (BoundedChannel 200) |
+| `CrawlerBackgroundService.cs` | Scoped DI + Orphaned 롤백 |
 
 ---
 

@@ -6,21 +6,39 @@ using Microsoft.Extensions.Options;
 
 namespace DynamicCrawler.Orchestrator;
 
-/// <summary>다운로드 오케스트레이터 — claim → download → 완료 처리</summary>
+/// <summary>다운로드 오케스트레이터 — Channel&lt;Media&gt; Consumer + DB Poll 이중 처리</summary>
 public sealed class DownloadOrchestrator(
     IMediaRepository mediaRepo,
     ISiteRepository siteRepo,
     IMediaDownloader downloader,
     RoundRobinScheduler scheduler,
+    CrawlPipeline pipeline,
     IOptions<CrawlerSettings> settings,
     ILogger<DownloadOrchestrator> logger)
 {
     private readonly CrawlerSettings _settings = settings.Value;
 
-    /// <summary>1 사이클: 라운드로빈으로 미디어 다운로드</summary>
+    /// <summary>1 사이클: Channel에서 미디어를 읽어 다운로드 (없으면 DB poll fallback)</summary>
     public async Task RunCycleAsync(CancellationToken ct)
     {
+        // 1단계: Channel에서 즉시 처리
+        var channelCount = 0;
+        while (pipeline.Reader.TryRead(out var channelMedia))
+        {
+            await ProcessMediaAsync(channelMedia, channelMedia.MediaUrl.Contains("aagag") ? "aagag" : "unknown", ct)
+                .ConfigureAwait(false);
+            channelCount++;
+        }
+
+        if (channelCount > 0)
+        {
+            logger.LogInformation("Channel에서 {Count}건의 미디어 처리 완료", channelCount);
+            return;
+        }
+
+        // 2단계: Channel이 비어있으면 DB poll fallback
         var sites = await siteRepo.GetActiveSitesAsync(ct).ConfigureAwait(false);
+        if (sites.Count == 0) return;
 
         var emptyCount = 0;
         while (emptyCount < sites.Count && !ct.IsCancellationRequested)
@@ -38,35 +56,37 @@ public sealed class DownloadOrchestrator(
             }
 
             emptyCount = 0;
-            var media = claimResult.Value!;
+            await ProcessMediaAsync(claimResult.Value!, siteKey, ct).ConfigureAwait(false);
+        }
+    }
 
-            // 게시글 정보 필요 (경로 생성용) — 간소화를 위해 postId 사용
-            var downloadResult = await downloader.DownloadAsync(
-                media, siteKey, media.PostId.ToString(), ct).ConfigureAwait(false);
+    private async Task ProcessMediaAsync(Core.Models.Media media, string siteKey, CancellationToken ct)
+    {
+        var downloadResult = await downloader.DownloadAsync(
+            media, siteKey, media.PostId.ToString(), ct).ConfigureAwait(false);
 
-            if (downloadResult.IsSuccess)
-            {
-                var result = downloadResult.Value!;
-                media.Sha256 = result.Sha256;
-                media.ByteSize = result.ByteSize;
-                media.ContentType = result.ContentType;
-                media.LocalPath = result.LocalPath;
-                media.Status = MediaStatus.Downloaded;
+        if (downloadResult.IsSuccess)
+        {
+            var result = downloadResult.Value!;
+            media.Sha256 = result.Sha256;
+            media.ByteSize = result.ByteSize;
+            media.ContentType = result.ContentType;
+            media.LocalPath = result.LocalPath;
+            media.Status = MediaStatus.Downloaded;
 
-                await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
-                logger.LogInformation("미디어 다운로드 완료: {Sha256} / {Url}", result.Sha256[..12], media.MediaUrl);
-            }
-            else
-            {
-                media.RetryCount++;
-                media.Status = media.RetryCount >= _settings.MaxRetryCount
-                    ? MediaStatus.Failed
-                    : MediaStatus.PendingDownload;
-                media.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, media.RetryCount));
+            await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
+            logger.LogInformation("미디어 다운로드 완료: {Sha256} / {Url}", result.Sha256[..12], media.MediaUrl);
+        }
+        else
+        {
+            media.RetryCount++;
+            media.Status = media.RetryCount >= _settings.MaxRetryCount
+                ? MediaStatus.Failed
+                : MediaStatus.PendingDownload;
+            media.NextRetryAt = DateTime.UtcNow.AddMinutes(Math.Pow(2, media.RetryCount));
 
-                await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
-                logger.LogWarning("미디어 다운로드 실패: {Url} / {Error}", media.MediaUrl, downloadResult.Error);
-            }
+            await mediaRepo.UpdateAsync(media, ct).ConfigureAwait(false);
+            logger.LogWarning("미디어 다운로드 실패: {Url} / {Error}", media.MediaUrl, downloadResult.Error);
         }
     }
 }

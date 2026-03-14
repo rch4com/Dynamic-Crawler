@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\DynamicCrawler.Core\DynamicCrawler.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PuppeteerSharp" />
     <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
   </ItemGroup>
 </Project>

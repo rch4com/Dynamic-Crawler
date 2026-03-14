@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "DynamicCrawler.Worker",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/DynamicCrawler.Worker", "--environment", "Development"],
+      "port": 5000
+    }
+  ]
+}

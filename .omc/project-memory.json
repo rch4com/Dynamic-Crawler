@@ -76,6 +76,12 @@
   },
   "hotPaths": [
     {
+      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
+      "accessCount": 2,
+      "lastAccessed": 1773466144463,
+      "type": "file"
+    },
+    {
       "path": "docs\\01_Requirements.md",
       "accessCount": 1,
       "lastAccessed": 1773464435737,
@@ -238,15 +244,21 @@
       "type": "file"
     },
     {
-      "path": "src\\DynamicCrawler.Worker\\appsettings.json",
-      "accessCount": 1,
-      "lastAccessed": 1773464533177,
-      "type": "file"
-    },
-    {
       "path": "tests\\DynamicCrawler.Tests\\IntegrationTests\\OrphanedDataRecoveryTests.cs",
       "accessCount": 1,
       "lastAccessed": 1773464533321,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\Properties\\launchSettings.json",
+      "accessCount": 1,
+      "lastAccessed": 1773466144074,
+      "type": "file"
+    },
+    {
+      "path": "src\\DynamicCrawler.Worker\\DynamicCrawler.Worker.csproj",
+      "accessCount": 1,
+      "lastAccessed": 1773466144702,
       "type": "file"
     }
   ],

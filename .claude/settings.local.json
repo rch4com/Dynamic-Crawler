@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_oh-my-claudecode_t__project_memory_read"
+      "mcp__plugin_oh-my-claudecode_t__project_memory_read",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ping -n 8 127.0.0.1)",
+      "Bash(timeout /t 15 /nobreak)"
     ]
   }
 }

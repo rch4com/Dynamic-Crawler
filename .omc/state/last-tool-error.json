@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd D:/sources/github/Dynamic-Crawler && dotnet build DynamicCrawler.sln 2>&1\",\"timeout\":120000,\"description\":\"전체 솔루션 빌드\"}",
+  "error": "Exit code 1\n  복원할 프로젝트를 확인하는 중...\r\n  복원할 모든 프로젝트가 최신 상태입니다.\r\n  DynamicCrawler.Core -> D:\\sources\\github\\Dynamic-Crawler\\src\\DynamicCrawler.Core\\bin\\Debug\\net10.0\\DynamicCrawler.Core.dll\r\n  DynamicCrawler.Sites.Aagag -> D:\\sources\\github\\Dynamic-Crawler\\src\\Sites\\DynamicCrawler.Sites.Aagag\\bin\\Debug\\net10.0\\DynamicCrawler.Sites.Aagag.dll\r\n  DynamicCrawler.Engine -> D:\\sources\\github\\Dynamic-Crawler\\src\\DynamicCrawler.Engine\\bin\\Debug\\net10.0\\DynamicCrawler.Engine.dll\r\n  DynamicCrawler.Data.Supaba...",
+  "timestamp": "2026-03-14T16:37:05.253Z",
+  "retry_count": 1
+}

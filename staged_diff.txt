@@ -1,0 +1,59 @@
+﻿diff --git a/.agent/skills/desktop-rules.md b/.agent/skills/desktop-rules.md
+index e898928..5464535 100644
+--- a/.agent/skills/desktop-rules.md
++++ b/.agent/skills/desktop-rules.md
+@@ -2,4 +2,36 @@
+ 而댄뙆?쇱쓣 ???뚮뒗 UTF8濡?而댄뙆????寃?
+ ??) chcp 65001 >$null; dotnet build art.SmartIcon.sln
+ ??) dotnet build art.SmartIcon.sln --output-encoding utf-8
+-??) dotnet test DynamicCrawler.sln --verbosity normal 2>&1 | Out-File d:\sources\github\Dynamic-Crawler\test_output.txt -Encoding
+\ No newline at end of file
++??) dotnet test DynamicCrawler.sln --verbosity normal 2>&1 | Out-File d:\sources\github\Dynamic-Crawler\test_output.txt -Encoding
++
++
++## Commit message rules
++When creating git commit messages, always use this format:
++
++<prefix>: <short summary>
++
++<detailed description>
++
++### Allowed prefixes
++- feat
++- fix
++- refactor
++- chore
++- docs
++- style
++- test
++- perf
++- ci
++- build
++
++### Rules
++- Summary must be concise and written in Korean
++- Keep the summary within about 60 characters
++- Add a blank line after the summary
++- Body should explain what changed and why
++- Use bullet points in the body when there are multiple changes
++- Never create a one-line commit message unless explicitly requested
++- If the change does not fit a business feature or bug, prefer `chore`
++
++**[CRITICAL INSTRUCTION FOR AI AGENT]**
++When you (the AI Assistant) automatically generate or propose a commit message (e.g., using "Generating" features or auto-committing), you MUST strictly adhere to the prefix and Korean summary format defined above. Do NOT use default English summaries like "Update desktop-rules.md". Always read this `Commit message rules` section before proposing any git commit command.
+\ No newline at end of file
+diff --git a/AGENTS.md b/AGENTS.md
+index 97d370f..929ddbd 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -26,4 +26,7 @@ When creating git commit messages, always use this format:
+ - Body should explain what changed and why
+ - Use bullet points in the body when there are multiple changes
+ - Never create a one-line commit message unless explicitly requested
+-- If the change does not fit a business feature or bug, prefer `chore`
+\ No newline at end of file
++- If the change does not fit a business feature or bug, prefer `chore`
++
++**[CRITICAL INSTRUCTION FOR AI AGENT]**
++When you (the AI Assistant) automatically generate or propose a commit message (e.g., using "Generating" features or auto-committing), you MUST strictly adhere to the prefix and Korean summary format defined above. Do NOT use default English summaries like "Update desktop-rules.md". Always read this `Commit message rules` section before proposing any git commit command.
+\ No newline at end of file

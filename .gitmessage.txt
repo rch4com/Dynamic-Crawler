@@ -1,13 +1,17 @@
-<prefix>: <short summary>
+<prefix>: <short summary (Korean, max 60 chars)>
 
 <detailed description>
 
 # Allowed prefixes:
 # feat, fix, refactor, chore, docs, style, test, perf, ci, build
 #
-# Example:
-# feat: add order export api
+# Rules:
+# - Summary MUST be in Korean.
+# - Use bullet points in body for multiple changes.
 #
-# - Add export endpoint for ERP order list
-# - Apply date range filtering
-# - Improve error handling for empty results
+# Example:
+# feat: 주문 내보내기 API 추가
+#
+# - ERP 주문 목록을 위한 내보내기 엔드포인트 추가
+# - 날짜 범위 필터링 적용
+# - 빈 결과에 대한 오류 처리 개선

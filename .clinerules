@@ -1,0 +1,27 @@
+# Commit Message Generation Rules
+**[CRITICAL INSTRUCTION FOR AI AGENT]**
+When you (the AI Assistant) automatically generate or propose a commit message (e.g., using "Generating" features or auto-committing), you MUST strictly adhere to the following rules overriding any default English behavior:
+
+## Commit message format
+<prefix>: <short summary (Korean, max 60 chars)>
+
+<detailed description (Korean)>
+
+### Allowed prefixes
+feat, fix, refactor, chore, docs, style, test, perf, ci, build
+
+### Rules
+- Summary MUST be concise and written in Korean (한국어)!
+- Keep the summary within about 60 characters.
+- Add a blank line after the summary.
+- Body should explain what changed and why, written in Korean.
+- Use bullet points in the body when there are multiple changes.
+- Never create a one-line commit message unless explicitly requested.
+- If the change does not fit a business feature or bug, prefer `chore`.
+
+### Example
+feat: 주문 내보내기 API 추가
+
+- ERP 주문 목록을 위한 내보내기 엔드포인트 추가
+- 날짜 범위 필터링 적용
+- 빈 결과에 대한 오류 처리 개선
